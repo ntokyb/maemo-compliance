@@ -180,12 +180,43 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      # Fails fast with a clear message; “no supported methods remain” is usually missing/wrong key or wrong user.
+      - name: Verify SSH secrets and private key format
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.MAEMO_COMPLIANCE_SSH_HOST }}
+          SSH_USER: ${{ secrets.MAEMO_COMPLIANCE_SSH_USER }}
+          SSH_KEY: ${{ secrets.MAEMO_COMPLIANCE_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SSH_HOST}" ]]; then
+            echo "::error::MAEMO_COMPLIANCE_SSH_HOST is empty. Add it under Repo Settings → Secrets or Environment → production."
+            exit 1
+          fi
+          if [[ -z "${SSH_USER}" ]]; then
+            echo "::error::MAEMO_COMPLIANCE_SSH_USER is empty."
+            exit 1
+          fi
+          if [[ -z "${SSH_KEY}" ]]; then
+            echo "::error::MAEMO_COMPLIANCE_SSH_KEY is empty."
+            exit 1
+          fi
+          if ! printf '%s' "${SSH_KEY}" | grep -qE 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY'; then
+            echo "::error::MAEMO_COMPLIANCE_SSH_KEY must be the **private** key (full file including BEGIN/END lines). If pasting breaks newlines, store base64 and decode in a prior step."
+            exit 1
+          fi
+          echo "SSH preflight OK (host, user, and PEM/OpenSSH private key header present)."
+
       - name: Deploy to Hetzner via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ secrets.MAEMO_COMPLIANCE_SSH_HOST }}
           username: ${{ secrets.MAEMO_COMPLIANCE_SSH_USER }}
           key: ${{ secrets.MAEMO_COMPLIANCE_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          script_stop: true
           script: |
             set -e
             cd /opt/maemo-compliance/app
