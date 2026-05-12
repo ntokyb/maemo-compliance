@@ -115,7 +115,7 @@ jobs:
           name: playwright-report-maemo
           path: e2e/maemo-compliance/playwright-report/
 
-  # Dockerfile paths: API/workers use repo root context; portal uses frontend/ (see MaemoCompliance.Api/Dockerfile, frontend/Dockerfile, workers/.../Dockerfile).
+  # Canonical Dockerfiles: docker/Dockerfile.{api,portal,workers} (repo root context for all three).
   docker-build:
     name: Build and push Docker images
     needs: [unit, integration]
@@ -152,8 +152,8 @@ jobs:
       - name: Build and push Portal image
         uses: docker/build-push-action@v6
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: .
+          file: docker/Dockerfile.portal
           push: true
           tags: |
             ghcr.io/ntokyb/maemo-compliance-portal:latest
@@ -165,7 +165,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: workers/src/MaemoCompliance.Workers/Dockerfile
+          file: docker/Dockerfile.workers
           push: true
           tags: |
             ghcr.io/ntokyb/maemo-compliance-workers:latest

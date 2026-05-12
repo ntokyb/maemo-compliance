@@ -1,0 +1,23 @@
+# Portal image — build from repository root (not frontend/):
+#   docker build -t ghcr.io/ntokyb/maemo-compliance-portal:latest -f docker/Dockerfile.portal .
+
+FROM node:20-alpine AS build
+WORKDIR /app
+
+COPY frontend/package*.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build -- --configuration production
+
+FROM nginx:alpine AS final
+WORKDIR /usr/share/nginx/html
+
+RUN rm -rf ./*
+
+COPY --from=build /app/dist/maemo-compliance-portal/browser .
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

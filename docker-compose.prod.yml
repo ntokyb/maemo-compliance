@@ -1,6 +1,13 @@
-# Production stack — images from GHCR; env in /opt/maemo-compliance/.env
-# Repo path on server: /opt/maemo-compliance/app/docker-compose.prod.yml
-# Nginx on host terminates TLS → 127.0.0.1:3020 (portal), 127.0.0.1:8090 (API).
+# Production stack — images from GHCR.
+# Repo on server: /opt/maemo-compliance/app/docker-compose.prod.yml
+# Env file:        /opt/maemo-compliance/.env
+#
+# Compose service name for Postgres is "postgres" (not the container_name). Use Host=postgres in
+# ConnectionStrings__MaemoDatabase. Required keys include ConnectionStrings__MaemoDatabase,
+# POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, AZURE_AUTHORITY, AZURE_AUDIENCE.
+#
+# Run: docker compose --env-file /opt/maemo-compliance/.env -f docker-compose.prod.yml up -d
+# Service names for partial start: postgres | api | workers | frontend
 
 networks:
   maemo-compliance-network:
@@ -12,16 +19,12 @@ services:
     container_name: maemo-compliance-postgres
     restart: unless-stopped
     env_file: /opt/maemo-compliance/.env
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-maemo_compliance}
-      POSTGRES_USER: ${POSTGRES_USER:-maemo_compliance}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in /opt/maemo-compliance/.env}
     volumes:
       - maemo_compliance_postgres_data:/var/lib/postgresql/data
     networks:
       - maemo-compliance-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U maemo_compliance -d maemo_compliance || exit 1']
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" || exit 1']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,14 +38,6 @@ services:
     env_file: /opt/maemo-compliance/.env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__MaemoDatabase: ${ConnectionStrings__MaemoDatabase:?}
-      Storage__ForceLocalFileStorage: ${Storage__ForceLocalFileStorage:-true}
-      Storage__LocalBasePath: ${Storage__LocalBasePath:-/app/files}
-      Authentication__Authority: ${AZURE_AUTHORITY:?}
-      Authentication__Audience: ${AZURE_AUDIENCE:?}
-      Resend__ApiKey: ${Resend__ApiKey:-}
-      Resend__FromAddress: ${Resend__FromAddress:-admin@maemo-compliance.co.za}
-      App__PublicPortalUrl: ${App__PublicPortalUrl:-https://maemo-compliance.co.za}
     volumes:
       - maemo_compliance_files:/app/files
     networks:
@@ -64,9 +59,6 @@ services:
     env_file: /opt/maemo-compliance/.env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__MaemoDatabase: ${ConnectionStrings__MaemoDatabase:?}
-      Storage__ForceLocalFileStorage: ${Storage__ForceLocalFileStorage:-true}
-      Storage__LocalBasePath: ${Storage__LocalBasePath:-/app/files}
     volumes:
       - maemo_compliance_files:/app/files
     networks:
