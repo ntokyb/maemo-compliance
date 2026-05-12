@@ -11,7 +11,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['html'], ['github'], ['list']],
   use: {
-    baseURL: process.env.MAEMO_URL ?? 'http://localhost:4200',
+    baseURL: process.env.MAEMO_URL ?? 'https://maemo-compliance.co.za',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

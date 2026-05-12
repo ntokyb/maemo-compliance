@@ -7,6 +7,11 @@
 **/dist/
 node_modules/
 
+# Playwright (e2e/maemo-compliance)
+e2e/maemo-compliance/test-results/
+e2e/maemo-compliance/playwright-report/
+e2e/maemo-compliance/blob-report/
+
 # IDE / OS
 .idea/
 .vs/

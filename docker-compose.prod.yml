@@ -1,0 +1,73 @@
+# Production stack on the VM (e.g. /opt/maemo-compliance/app).
+# Host nginx (see nginx/maemo-compliance.conf) proxies TLS to 127.0.0.1:3020 (portal) and :8090 (API).
+# Set secrets via `.env` (see deploy/.env.example). Images must exist in GHCR.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: maemo-compliance-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-maemo_compliance}
+      POSTGRES_USER: ${POSTGRES_USER:-maemo_compliance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - maemo_compliance_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER:-maemo_compliance} || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/ntokyb/maemo-compliance-api:latest
+    container_name: maemo-compliance-api
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8090:8080'
+    env_file: .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__MaemoDatabase: ${ConnectionStrings__MaemoDatabase:?}
+      Storage__ForceLocalFileStorage: ${Storage__ForceLocalFileStorage:-true}
+      Storage__LocalBasePath: ${Storage__LocalBasePath:-/app/files}
+      Authentication__Authority: ${AZURE_AUTHORITY:?}
+      Authentication__Audience: ${AZURE_AUDIENCE:?}
+      Resend__ApiKey: ${Resend__ApiKey:-}
+      Resend__FromAddress: ${Resend__FromAddress:-admin@maemo-compliance.co.za}
+      App__PublicPortalUrl: ${App__PublicPortalUrl:-https://maemo-compliance.co.za}
+    volumes:
+      - maemo_compliance_file_storage:/app/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  workers:
+    image: ghcr.io/ntokyb/maemo-compliance-workers:latest
+    container_name: maemo-compliance-workers
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__MaemoDatabase: ${ConnectionStrings__MaemoDatabase:?}
+      Storage__ForceLocalFileStorage: ${Storage__ForceLocalFileStorage:-true}
+      Storage__LocalBasePath: ${Storage__LocalBasePath:-/app/files}
+    volumes:
+      - maemo_compliance_file_storage:/app/files
+    depends_on:
+      api:
+        condition: service_started
+
+  frontend:
+    image: ghcr.io/ntokyb/maemo-compliance-portal:latest
+    container_name: maemo-compliance-portal
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:3020:80'
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  maemo_compliance_postgres_data:
+  maemo_compliance_file_storage:

@@ -1,6 +1,5 @@
 # maemo-compliance: .NET 8 backend (MaemoCompliance.sln) + Angular portal (frontend/).
 # Tests: MaemoCompliance.UnitTests / MaemoCompliance.IntegrationTests (Testcontainers; Docker on runner).
-# When you add Playwright E2E, reintroduce a job like the template (chromium + STAGING_URL).
 
 name: CI
 
@@ -76,7 +75,7 @@ jobs:
       # - run: npx playwright install --with-deps chromium
       # - run: npx playwright test --project=billable
       #   env:
-      #     BILLABLE_URL: ${{ secrets.STAGING_URL }}
+      #     BILLABLE_URL: ${{ secrets.MAEMO_COMPLIANCE_STAGING_URL }}
 
   playwright-smoke:
     name: Playwright smoke tests
@@ -102,8 +101,8 @@ jobs:
         run: npx playwright test --grep @smoke
         working-directory: e2e/maemo-compliance
         env:
-          MAEMO_URL: ${{ secrets.MAEMO_STAGING_URL }}
-          MAEMO_API_URL: ${{ secrets.MAEMO_API_STAGING_URL }}
+          MAEMO_URL: ${{ secrets.MAEMO_COMPLIANCE_STAGING_URL }}
+          MAEMO_API_URL: ${{ secrets.MAEMO_COMPLIANCE_API_STAGING_URL }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -114,11 +113,18 @@ jobs:
 
   deploy:
     needs: [frontend]
-    if: false # Enable when deploy is defined: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy (configure for maemo-compliance)
-        run: |
-          echo "Define deploy: e.g. docker build/push ghcr.io/ntokyb/maemo-compliance-*, or SSH to Hetzner."
-          echo "Example: ssh -i ~/.ssh/key user@host 'cd /app && git pull && docker compose up -d'"
-          exit 0
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.MAEMO_COMPLIANCE_SSH_HOST }}
+          username: ${{ secrets.MAEMO_COMPLIANCE_SSH_USER }}
+          key: ${{ secrets.MAEMO_COMPLIANCE_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /opt/maemo-compliance/app
+            git pull origin main
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
