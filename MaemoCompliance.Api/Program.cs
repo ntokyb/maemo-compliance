@@ -376,6 +376,12 @@ For external integrations, always use `/engine/v1` endpoints.
                     (c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role" || c.Type == "roles") &&
                     (c.Value == "Consultant" || c.Value == "3"))));
 
+        options.AddPolicy("RequireDocumentApprover", policy =>
+            policy.RequireAssertion(context =>
+                context.User.HasClaim(c =>
+                    (c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role" || c.Type == "roles") &&
+                    c.Value == "DocumentApprover")));
+
         // RequireAdminOrTenantAdmin policy - user must have Admin or TenantAdmin role
         options.AddPolicy("RequireAdminOrTenantAdmin", policy =>
             policy.RequireAssertion(context =>
@@ -625,6 +631,8 @@ For external integrations, always use `/engine/v1` endpoints.
 
     // Audit endpoints
     app.MapAuditsEndpoints();
+
+    app.MapAuditProgrammesEndpoints();
 
     // Audit log endpoints (read-only)
     app.MapAuditLogEndpoints();

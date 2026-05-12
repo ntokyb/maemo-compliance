@@ -30,6 +30,9 @@ public interface IApplicationDbContext
     DbSet<AuditQuestion> AuditQuestions { get; }
     DbSet<AuditRun> AuditRuns { get; }
     DbSet<AuditAnswer> AuditAnswers { get; }
+    DbSet<AuditProgramme> AuditProgrammes { get; }
+    DbSet<AuditScheduleItem> AuditScheduleItems { get; }
+    DbSet<AuditFinding> AuditFindings { get; }
     DbSet<AuditLogEntry> AuditLogs { get; }
     
     // Logging entities

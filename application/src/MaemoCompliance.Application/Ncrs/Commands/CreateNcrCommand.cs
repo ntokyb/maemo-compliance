@@ -18,5 +18,6 @@ public class CreateNcrCommand : IRequest<Guid>
     public string? RootCause { get; set; }
     public string? CorrectiveAction { get; set; }
     public int EscalationLevel { get; set; } = 0;
+    public Guid? LinkedAuditFindingId { get; set; }
 }
 

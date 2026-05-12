@@ -49,7 +49,27 @@ public class NcrConfiguration : IEntityTypeConfiguration<Ncr>
 
         builder.Property(n => n.RootCause);
 
+        builder.Property(n => n.RootCauseMethod)
+            .HasMaxLength(200);
+
         builder.Property(n => n.CorrectiveAction);
+
+        builder.Property(n => n.CorrectiveActionPlan);
+
+        builder.Property(n => n.CorrectiveActionOwner)
+            .HasMaxLength(200);
+
+        builder.Property(n => n.CorrectiveActionDueDate);
+
+        builder.Property(n => n.CorrectiveActionCompletedAt);
+
+        builder.Property(n => n.EffectivenessConfirmed)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(n => n.EffectivenessVerifiedAt);
+
+        builder.Property(n => n.LinkedAuditFindingId);
 
         builder.Property(n => n.EscalationLevel)
             .IsRequired()

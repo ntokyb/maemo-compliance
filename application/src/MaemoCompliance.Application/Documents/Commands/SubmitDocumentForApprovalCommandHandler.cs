@@ -61,6 +61,7 @@ public class SubmitDocumentForApprovalCommandHandler : IRequestHandler<SubmitDoc
         var previousState = document.WorkflowState;
         document.WorkflowState = DocumentWorkflowState.PendingApproval;
         document.Status = DocumentWorkflowStateMachine.MapToDocumentStatus(document.WorkflowState);
+        document.SubmittedForReviewAt = _dateTimeProvider.UtcNow;
         document.ModifiedAt = _dateTimeProvider.UtcNow;
         document.ModifiedBy = _currentUserService.UserId;
         document.RejectedReason = null; // Clear any previous rejection reason

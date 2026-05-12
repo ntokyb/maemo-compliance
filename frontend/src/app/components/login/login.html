@@ -3,7 +3,7 @@
     <img *ngIf="branding?.logoUrl" [src]="branding?.logoUrl" alt="Logo" class="login-logo">
     <h1>Maemo Portal</h1>
     <p>Sign in to access the Maemo Governance, Risk & Compliance system</p>
-    <button (click)="login()" class="login-btn" [style.background-color]="branding?.primaryColor || ''">Sign in with Microsoft</button>
+    <button type="button" data-testid="login-button" (click)="login()" class="login-btn" [style.background-color]="branding?.primaryColor || ''">Sign in with Microsoft</button>
     <p class="signup-hint"><a routerLink="/signup">Create a new company workspace</a></p>
     
     <!-- Demo Mode Option -->

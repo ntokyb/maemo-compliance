@@ -57,7 +57,15 @@ public class GetNcrListQueryHandler : IRequestHandler<GetNcrListQuery, IReadOnly
                 Category = n.Category,
                 RootCause = n.RootCause,
                 CorrectiveAction = n.CorrectiveAction,
-                EscalationLevel = n.EscalationLevel
+                EscalationLevel = n.EscalationLevel,
+                RootCauseMethod = n.RootCauseMethod,
+                CorrectiveActionPlan = n.CorrectiveActionPlan,
+                CorrectiveActionOwner = n.CorrectiveActionOwner,
+                CorrectiveActionDueDate = n.CorrectiveActionDueDate,
+                CorrectiveActionCompletedAt = n.CorrectiveActionCompletedAt,
+                EffectivenessConfirmed = n.EffectivenessConfirmed,
+                EffectivenessVerifiedAt = n.EffectivenessVerifiedAt,
+                LinkedAuditFindingId = n.LinkedAuditFindingId
             })
             .AsNoTracking()
             .ToListAsync(cancellationToken);

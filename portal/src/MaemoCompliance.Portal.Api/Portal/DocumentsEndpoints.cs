@@ -638,7 +638,7 @@ public static class DocumentsEndpoints
             {
                 return ErrorResults.NotFound("DocumentNotFound", ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception but don't expose internal details to client
                 return ErrorResults.BadRequest(

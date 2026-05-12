@@ -20,6 +20,14 @@ public class NcrDto
     public string? RootCause { get; set; }
     public string? CorrectiveAction { get; set; }
     public int EscalationLevel { get; set; }
+    public string? RootCauseMethod { get; set; }
+    public string? CorrectiveActionPlan { get; set; }
+    public string? CorrectiveActionOwner { get; set; }
+    public DateTime? CorrectiveActionDueDate { get; set; }
+    public DateTime? CorrectiveActionCompletedAt { get; set; }
+    public bool EffectivenessConfirmed { get; set; }
+    public DateTime? EffectivenessVerifiedAt { get; set; }
+    public Guid? LinkedAuditFindingId { get; set; }
 }
 
 public class NcrStatusHistoryDto

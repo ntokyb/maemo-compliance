@@ -34,6 +34,11 @@ public enum DocumentWorkflowState
     /// Document has been archived and is no longer active.
     /// Terminal state - cannot transition from this state.
     /// </summary>
-    Archived = 4
+    Archived = 4,
+
+    /// <summary>
+    /// A newer approved version exists; this record is retained for history only.
+    /// </summary>
+    Obsolete = 5,
 }
 

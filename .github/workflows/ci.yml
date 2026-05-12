@@ -78,6 +78,40 @@ jobs:
       #   env:
       #     BILLABLE_URL: ${{ secrets.STAGING_URL }}
 
+  playwright-smoke:
+    name: Playwright smoke tests
+    runs-on: ubuntu-latest
+    needs: [unit, integration]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: e2e/maemo-compliance
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: e2e/maemo-compliance
+
+      - name: Run smoke tests only
+        run: npx playwright test --grep @smoke
+        working-directory: e2e/maemo-compliance
+        env:
+          MAEMO_URL: ${{ secrets.MAEMO_STAGING_URL }}
+          MAEMO_API_URL: ${{ secrets.MAEMO_API_STAGING_URL }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-maemo
+          path: e2e/maemo-compliance/playwright-report/
+
   deploy:
     needs: [frontend]
     if: false # Enable when deploy is defined: github.ref == 'refs/heads/main'

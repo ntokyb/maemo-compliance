@@ -5,6 +5,8 @@ public enum DocumentStatus
     Draft = 0,
     UnderReview = 1,
     Active = 2,
-    Archived = 3
+    Archived = 3,
+    Approved = 4,
+    Obsolete = 5,
 }
 

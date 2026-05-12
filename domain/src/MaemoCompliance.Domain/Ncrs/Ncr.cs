@@ -16,7 +16,15 @@ public class Ncr : TenantOwnedEntity
     // Phase 2 enhancements
     public NcrCategory Category { get; set; } = NcrCategory.Process;
     public string? RootCause { get; set; }
+    public string? RootCauseMethod { get; set; }
     public string? CorrectiveAction { get; set; }
+    public string? CorrectiveActionPlan { get; set; }
+    public string? CorrectiveActionOwner { get; set; }
+    public DateTime? CorrectiveActionDueDate { get; set; }
+    public DateTime? CorrectiveActionCompletedAt { get; set; }
+    public bool EffectivenessConfirmed { get; set; }
+    public DateTime? EffectivenessVerifiedAt { get; set; }
+    public Guid? LinkedAuditFindingId { get; set; }
     public int EscalationLevel { get; set; } = 0; // 0 = none, 1 = supervisory, 2 = management, 3 = executive
 }
 

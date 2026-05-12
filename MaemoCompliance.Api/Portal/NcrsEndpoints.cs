@@ -95,7 +95,8 @@ public static class NcrsEndpoints
                 Category = request.Category,
                 RootCause = request.RootCause,
                 CorrectiveAction = request.CorrectiveAction,
-                EscalationLevel = request.EscalationLevel
+                EscalationLevel = request.EscalationLevel,
+                LinkedAuditFindingId = request.LinkedAuditFindingId
             };
 
             var ncrId = await mediator.Send(command, cancellationToken);
@@ -194,6 +195,62 @@ public static class NcrsEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .ProducesValidationProblem();
 
+        // PUT /api/ncrs/{id}/root-cause
+        group.MapPut("/{id:guid}/root-cause", async (
+            Guid id,
+            UpdateNcrRootCauseRequest request,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var dto = await mediator.Send(new UpdateNcrRootCauseCommand
+                {
+                    NcrId = id,
+                    RootCauseMethod = request.RootCauseMethod,
+                    RootCause = request.RootCause,
+                    CorrectiveActionPlan = request.CorrectiveActionPlan,
+                    CorrectiveActionOwner = request.CorrectiveActionOwner,
+                    CorrectiveActionDueDate = request.CorrectiveActionDueDate,
+                }, cancellationToken);
+                return Results.Ok(dto);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+        })
+        .WithName("UpdateNcrRootCause")
+        .WithOpenApi()
+        .Produces<NcrDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
+
+        // POST /api/ncrs/{id}/confirm-effectiveness
+        group.MapPost("/{id:guid}/confirm-effectiveness", async (
+            Guid id,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                await mediator.Send(new ConfirmNcrEffectivenessCommand { NcrId = id }, cancellationToken);
+                return Results.NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("ConfirmNcrEffectiveness")
+        .WithOpenApi()
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status400BadRequest);
+
         // GET /api/ncrs/{id}/history
         group.MapGet("/{id:guid}/history", async (
             Guid id,
@@ -270,6 +327,15 @@ public static class NcrsEndpoints
         .WithOpenApi()
         .Produces<IReadOnlyList<MaemoCompliance.Application.Risks.Dtos.RiskDto>>(StatusCodes.Status200OK);
     }
+}
+
+public sealed class UpdateNcrRootCauseRequest
+{
+    public string? RootCauseMethod { get; set; }
+    public string? RootCause { get; set; }
+    public string? CorrectiveActionPlan { get; set; }
+    public string? CorrectiveActionOwner { get; set; }
+    public DateTime? CorrectiveActionDueDate { get; set; }
 }
 
 public class UpdateNcrStatusRequest

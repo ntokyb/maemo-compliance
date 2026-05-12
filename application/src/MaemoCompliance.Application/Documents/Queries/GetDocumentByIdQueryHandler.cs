@@ -80,7 +80,10 @@ public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery,
                 IsPendingArchive = d.IsPendingArchive,
                 Version = d.Version,
                 ApproverUserId = d.ApproverUserId,
+                ApprovedBy = d.ApprovedBy,
                 ApprovedAt = d.ApprovedAt,
+                SubmittedForReviewAt = d.SubmittedForReviewAt,
+                SupersededByDocumentId = d.SupersededByDocumentId,
                 Comments = d.Comments,
                 IsCurrentVersion = d.IsCurrentVersion,
                 PreviousVersionId = d.PreviousVersionId,
@@ -95,6 +98,7 @@ public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery,
 
         if (document != null)
         {
+            document.SemanticVersion = DocumentSemanticVersion.Format(document.Version);
             // Load latest version if exists
             var latestVersion = await _context.DocumentVersions
                 .Where(dv => dv.DocumentId == request.Id && dv.IsLatest)

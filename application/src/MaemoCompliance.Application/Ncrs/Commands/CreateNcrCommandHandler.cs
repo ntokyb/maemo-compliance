@@ -50,7 +50,8 @@ public class CreateNcrCommandHandler : IRequestHandler<CreateNcrCommand, Guid>
             Category = request.Category,
             RootCause = request.RootCause,
             CorrectiveAction = request.CorrectiveAction,
-            EscalationLevel = request.EscalationLevel
+            EscalationLevel = request.EscalationLevel,
+            LinkedAuditFindingId = request.LinkedAuditFindingId,
         };
 
         _context.Ncrs.Add(ncr);

@@ -65,6 +65,12 @@ public class ChangeDocumentStatusCommandHandler : IRequestHandler<ChangeDocument
                     document.WorkflowState = DocumentWorkflowState.PendingApproval;
                 }
                 break;
+            case DocumentStatus.Approved:
+                if (document.WorkflowState == DocumentWorkflowState.PendingApproval)
+                {
+                    document.WorkflowState = DocumentWorkflowState.Approved;
+                }
+                break;
             case DocumentStatus.Active:
                 // Status Active maps to Active workflow state
                 // Only allow if document is Approved or already Active

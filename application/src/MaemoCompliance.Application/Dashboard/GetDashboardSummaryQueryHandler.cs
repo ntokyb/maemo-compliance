@@ -35,7 +35,8 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
             .CountAsync(cancellationToken);
 
         var activeDocuments = await _context.Documents
-            .Where(d => d.TenantId == tenantId && d.IsCurrentVersion && d.Status == DocumentStatus.Active)
+            .Where(d => d.TenantId == tenantId && d.IsCurrentVersion &&
+                        (d.Status == DocumentStatus.Active || d.Status == DocumentStatus.Approved))
             .CountAsync(cancellationToken);
 
         // NCRs queries

@@ -92,7 +92,14 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder.Property(d => d.ApproverUserId)
             .HasMaxLength(200);
 
+        builder.Property(d => d.ApprovedBy)
+            .HasMaxLength(200);
+
         builder.Property(d => d.ApprovedAt);
+
+        builder.Property(d => d.SubmittedForReviewAt);
+
+        builder.Property(d => d.SupersededByDocumentId);
 
         builder.Property(d => d.Comments)
             .HasMaxLength(2000);

@@ -167,27 +167,16 @@ public static class DocumentsEndpoints
         .ProducesValidationProblem();
 
         // POST /api/documents/{id}/submit-for-approval
-        group.MapPost("/{id:guid}/submit-for-approval", async (
-            Guid id,
-            IMediator mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var command = new SubmitDocumentForApprovalCommand
-            {
-                DocumentId = id
-            };
-
-            try
-            {
-                await mediator.Send(command, cancellationToken);
-                return Results.NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-        })
+        group.MapPost("/{id:guid}/submit-for-approval", SubmitDocumentForApprovalImpl)
         .WithName("SubmitDocumentForApproval")
+        .WithOpenApi()
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status400BadRequest)
+        .ProducesValidationProblem();
+
+        // POST /api/documents/{id}/submit-for-review — alias
+        group.MapPost("/{id:guid}/submit-for-review", SubmitDocumentForApprovalImpl)
+        .WithName("SubmitDocumentForReview")
         .WithOpenApi()
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status400BadRequest)
@@ -203,7 +192,8 @@ public static class DocumentsEndpoints
             var command = new ApproveDocumentCommand
             {
                 DocumentId = id,
-                Comments = request?.Comments
+                Comments = request?.Comments,
+                ApproverName = request?.ApproverName,
             };
 
             try
@@ -216,6 +206,7 @@ public static class DocumentsEndpoints
                 return Results.BadRequest(new { error = ex.Message });
             }
         })
+        .RequireAuthorization("RequireDocumentApprover")
         .WithName("ApproveDocument")
         .WithOpenApi()
         .Produces(StatusCodes.Status204NoContent)
@@ -246,6 +237,35 @@ public static class DocumentsEndpoints
             }
         })
         .WithName("RejectDocument")
+        .WithOpenApi()
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status400BadRequest)
+        .ProducesValidationProblem();
+
+        // POST /api/documents/{id}/return-for-revision
+        group.MapPost("/{id:guid}/return-for-revision", async (
+            Guid id,
+            ReturnForRevisionRequest request,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            var command = new RejectDocumentCommand
+            {
+                DocumentId = id,
+                RejectedReason = request.Reason
+            };
+
+            try
+            {
+                await mediator.Send(command, cancellationToken);
+                return Results.NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("ReturnDocumentForRevision")
         .WithOpenApi()
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status400BadRequest)
@@ -639,6 +659,27 @@ public static class DocumentsEndpoints
         .WithOpenApi()
         .Produces<IReadOnlyList<PopiaTrailReportItemDto>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest);
+    }
+
+    private static async Task<IResult> SubmitDocumentForApprovalImpl(
+        Guid id,
+        IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var command = new SubmitDocumentForApprovalCommand
+        {
+            DocumentId = id
+        };
+
+        try
+        {
+            await mediator.Send(command, cancellationToken);
+            return Results.NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
 }
 

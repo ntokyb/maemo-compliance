@@ -26,17 +26,21 @@ public static class DocumentWorkflowStateMachine
             DocumentWorkflowState.Draft => to == DocumentWorkflowState.PendingApproval,
 
             // PendingApproval can transition to: Approved (approved), Draft (rejected)
-            DocumentWorkflowState.PendingApproval => to == DocumentWorkflowState.Approved || 
+            DocumentWorkflowState.PendingApproval => to == DocumentWorkflowState.Approved ||
                                                       to == DocumentWorkflowState.Draft,
 
-            // Approved can transition to: Active
-            DocumentWorkflowState.Approved => to == DocumentWorkflowState.Active,
+            // Approved can transition to: Active, or Obsolete when superseded
+            DocumentWorkflowState.Approved => to == DocumentWorkflowState.Active ||
+                                             to == DocumentWorkflowState.Obsolete,
 
-            // Active can transition to: Archived
-            DocumentWorkflowState.Active => to == DocumentWorkflowState.Archived,
+            // Active can transition to: Archived, or Obsolete when superseded by a newer version
+            DocumentWorkflowState.Active => to == DocumentWorkflowState.Archived ||
+                                           to == DocumentWorkflowState.Obsolete,
 
             // Archived is terminal - no transitions allowed
             DocumentWorkflowState.Archived => false,
+
+            DocumentWorkflowState.Obsolete => false,
 
             _ => false
         };
@@ -53,9 +57,10 @@ public static class DocumentWorkflowStateMachine
         {
             DocumentWorkflowState.Draft => new[] { DocumentWorkflowState.PendingApproval },
             DocumentWorkflowState.PendingApproval => new[] { DocumentWorkflowState.Approved, DocumentWorkflowState.Draft },
-            DocumentWorkflowState.Approved => new[] { DocumentWorkflowState.Active },
-            DocumentWorkflowState.Active => new[] { DocumentWorkflowState.Archived },
+            DocumentWorkflowState.Approved => new[] { DocumentWorkflowState.Active, DocumentWorkflowState.Obsolete },
+            DocumentWorkflowState.Active => new[] { DocumentWorkflowState.Archived, DocumentWorkflowState.Obsolete },
             DocumentWorkflowState.Archived => Array.Empty<DocumentWorkflowState>(),
+            DocumentWorkflowState.Obsolete => Array.Empty<DocumentWorkflowState>(),
             _ => Array.Empty<DocumentWorkflowState>()
         };
     }
@@ -81,9 +86,10 @@ public static class DocumentWorkflowStateMachine
         {
             DocumentWorkflowState.Draft => DocumentStatus.Draft,
             DocumentWorkflowState.PendingApproval => DocumentStatus.UnderReview,
-            DocumentWorkflowState.Approved => DocumentStatus.Active, // Approved is treated as Active
+            DocumentWorkflowState.Approved => DocumentStatus.Approved,
             DocumentWorkflowState.Active => DocumentStatus.Active,
             DocumentWorkflowState.Archived => DocumentStatus.Archived,
+            DocumentWorkflowState.Obsolete => DocumentStatus.Obsolete,
             _ => DocumentStatus.Draft
         };
     }

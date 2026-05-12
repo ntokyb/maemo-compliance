@@ -36,7 +36,11 @@ public class Document : TenantOwnedEntity
     // Versioning properties
     public int Version { get; set; } = 1;
     public string? ApproverUserId { get; set; }
+    /// <summary>Display name of the approver (in addition to <see cref="ApproverUserId"/>).</summary>
+    public string? ApprovedBy { get; set; }
     public DateTime? ApprovedAt { get; set; }
+    public DateTime? SubmittedForReviewAt { get; set; }
+    public Guid? SupersededByDocumentId { get; set; }
     public string? Comments { get; set; }
     public bool IsCurrentVersion { get; set; } = true;
     public Guid? PreviousVersionId { get; set; }

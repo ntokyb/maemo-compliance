@@ -47,6 +47,9 @@ public class MaemoComplianceDbContext : DbContext, IApplicationDbContext
     public DbSet<AuditQuestion> AuditQuestions { get; set; } = null!;
     public DbSet<AuditRun> AuditRuns { get; set; } = null!;
     public DbSet<AuditAnswer> AuditAnswers { get; set; } = null!;
+    public DbSet<AuditProgramme> AuditProgrammes { get; set; } = null!;
+    public DbSet<AuditScheduleItem> AuditScheduleItems { get; set; } = null!;
+    public DbSet<AuditFinding> AuditFindings { get; set; } = null!;
     public DbSet<AuditLogEntry> AuditLogs { get; set; } = null!;
     public DbSet<ApiKey> ApiKeys { get; set; } = null!;
     public DbSet<WebhookSubscription> WebhookSubscriptions { get; set; } = null!;

@@ -25,7 +25,10 @@ public class DocumentDto
     public bool IsPendingArchive { get; set; }
     public int Version { get; set; }
     public string? ApproverUserId { get; set; }
+    public string? ApprovedBy { get; set; }
     public DateTime? ApprovedAt { get; set; }
+    public DateTime? SubmittedForReviewAt { get; set; }
+    public Guid? SupersededByDocumentId { get; set; }
     public string? Comments { get; set; } // Approval comments
     public bool IsCurrentVersion { get; set; }
     public Guid? PreviousVersionId { get; set; }
@@ -39,6 +42,8 @@ public class DocumentDto
     // Versioning information
     public int LatestVersionNumber { get; set; }
     public bool HasVersions { get; set; }
+    /// <summary>Major-only label e.g. "1.0" for <see cref="Version"/> 1.</summary>
+    public string SemanticVersion { get; set; } = string.Empty;
     public DocumentVersionDto? LatestVersion { get; set; }
 }
 

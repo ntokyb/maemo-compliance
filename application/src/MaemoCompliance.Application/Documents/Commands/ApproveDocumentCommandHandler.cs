@@ -55,11 +55,31 @@ public class ApproveDocumentCommandHandler : IRequestHandler<ApproveDocumentComm
         document.WorkflowState = DocumentWorkflowState.Approved;
         document.Status = DocumentWorkflowStateMachine.MapToDocumentStatus(document.WorkflowState);
         document.ApproverUserId = _currentUserService.UserId;
+        document.ApprovedBy = request.ApproverName ?? _currentUserService.UserEmail ?? _currentUserService.UserId;
         document.ApprovedAt = _dateTimeProvider.UtcNow;
         document.Comments = request.Comments;
         document.ModifiedAt = _dateTimeProvider.UtcNow;
         document.ModifiedBy = _currentUserService.UserId;
         document.RejectedReason = null; // Clear any previous rejection reason
+
+        if (document.PreviousVersionId is Guid previousVersionId)
+        {
+            var previous = await _context.Documents
+                .FirstOrDefaultAsync(
+                    d => d.Id == previousVersionId && d.TenantId == tenantId,
+                    cancellationToken);
+
+            if (previous != null &&
+                (previous.WorkflowState == DocumentWorkflowState.Approved ||
+                 previous.WorkflowState == DocumentWorkflowState.Active))
+            {
+                previous.WorkflowState = DocumentWorkflowState.Obsolete;
+                previous.Status = DocumentWorkflowStateMachine.MapToDocumentStatus(previous.WorkflowState);
+                previous.SupersededByDocumentId = document.Id;
+                previous.ModifiedAt = _dateTimeProvider.UtcNow;
+                previous.ModifiedBy = _currentUserService.UserId;
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

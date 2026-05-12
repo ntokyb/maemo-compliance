@@ -14,7 +14,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastLoginAt",
                 table: "Users",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
@@ -26,7 +26,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "OnboardingStepsCompletedJson",
                 table: "Tenants",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true);
 
             migrationBuilder.CreateTable(
@@ -59,7 +59,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     TenantId = table.Column<Guid>(type: "uuid", nullable: false),
                     ToEmail = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     Subject = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Body = table.Column<string>(type: "text", nullable: false),
                     SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),

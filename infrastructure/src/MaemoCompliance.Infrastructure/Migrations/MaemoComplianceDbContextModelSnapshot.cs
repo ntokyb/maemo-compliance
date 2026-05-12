@@ -200,6 +200,88 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     b.ToTable("AuditAnswers", (string)null);
                 });
 
+            modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditFinding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuditRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("LinkedNcrId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "AuditRunId");
+
+                    b.ToTable("AuditFindings", (string)null);
+                });
+
+            modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditProgramme", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Year");
+
+                    b.ToTable("AuditProgrammes", (string)null);
+                });
+
             modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -294,6 +376,60 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     b.ToTable("AuditRuns", (string)null);
                 });
 
+            modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditScheduleItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuditProgrammeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AuditorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("LinkedAuditId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("PlannedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProcessArea")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuditProgrammeId");
+
+                    b.HasIndex("TenantId", "AuditProgrammeId");
+
+                    b.ToTable("AuditScheduleItems", (string)null);
+                });
+
             modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditTemplate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -343,6 +479,10 @@ namespace MaemoCompliance.Infrastructure.Migrations
 
                     b.Property<DateTime?>("ApprovedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ApproverUserId")
                         .HasMaxLength(200)
@@ -474,6 +614,12 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     b.Property<string>("StorageLocation")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("SubmittedForReviewAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SupersededByDocumentId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -901,6 +1047,19 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     b.Property<string>("CorrectiveAction")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("CorrectiveActionCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("CorrectiveActionDueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CorrectiveActionOwner")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CorrectiveActionPlan")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -919,10 +1078,21 @@ namespace MaemoCompliance.Infrastructure.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("EffectivenessConfirmed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("EffectivenessVerifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("EscalationLevel")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
+
+                    b.Property<Guid?>("LinkedAuditFindingId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -937,6 +1107,10 @@ namespace MaemoCompliance.Infrastructure.Migrations
 
                     b.Property<string>("RootCause")
                         .HasColumnType("text");
+
+                    b.Property<string>("RootCauseMethod")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Severity")
                         .HasColumnType("integer");
@@ -1280,7 +1454,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<DateTime?>("LicenseExpiryDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LogoUrl")
                         .HasMaxLength(500)
@@ -1368,7 +1542,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("TrialEndsAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1510,7 +1684,7 @@ namespace MaemoCompliance.Infrastructure.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1685,6 +1859,17 @@ namespace MaemoCompliance.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditScheduleItem", b =>
+                {
+                    b.HasOne("MaemoCompliance.Domain.Audits.AuditProgramme", "AuditProgramme")
+                        .WithMany("Items")
+                        .HasForeignKey("AuditProgrammeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AuditProgramme");
+                });
+
             modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditTemplate", b =>
                 {
                     b.HasOne("MaemoCompliance.Domain.Users.User", null)
@@ -1718,6 +1903,11 @@ namespace MaemoCompliance.Infrastructure.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MaemoCompliance.Domain.Audits.AuditProgramme", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("MaemoCompliance.Domain.Documents.Document", b =>

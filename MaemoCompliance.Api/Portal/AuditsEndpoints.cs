@@ -3,6 +3,7 @@ using MaemoCompliance.Application.Common;
 using MaemoCompliance.Application.Audits.Commands;
 using MaemoCompliance.Application.Audits.Dtos;
 using MaemoCompliance.Application.Audits.Queries;
+using MaemoCompliance.Application.Ncrs.Commands;
 using MaemoCompliance.Application.Tenants;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -367,6 +368,82 @@ public static class AuditsEndpoints
         .Produces<object>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/runs/{runId:guid}/findings", async (
+            Guid runId,
+            CreateAuditFindingBody body,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var dto = await mediator.Send(new CreateAuditFindingCommand
+                {
+                    AuditRunId = runId,
+                    Title = body.Title,
+                }, cancellationToken);
+                return Results.Created($"/api/audits/runs/{runId}/findings/{dto.Id}", dto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { error = ex.Message });
+            }
+        })
+        .WithName("CreateAuditFinding")
+        .WithOpenApi()
+        .Produces<AuditFindingDto>(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status404NotFound);
+
+        group.MapGet("/runs/{runId:guid}/findings/{findingId:guid}", async (
+            Guid runId,
+            Guid findingId,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            var dto = await mediator.Send(new GetAuditFindingByIdQuery
+            {
+                AuditRunId = runId,
+                FindingId = findingId,
+            }, cancellationToken);
+
+            return dto == null ? Results.NotFound() : Results.Ok(dto);
+        })
+        .WithName("GetAuditFindingById")
+        .WithOpenApi()
+        .Produces<AuditFindingDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/runs/{runId:guid}/findings/{findingId:guid}/create-ncr", async (
+            Guid runId,
+            Guid findingId,
+            IMediator mediator,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var ncrId = await mediator.Send(new CreateNcrFromAuditFindingCommand
+                {
+                    AuditRunId = runId,
+                    FindingId = findingId,
+                }, cancellationToken);
+                return Results.Ok(new { ncrId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        })
+        .WithName("CreateNcrFromAuditFinding")
+        .WithOpenApi()
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status400BadRequest);
     }
+
+    public sealed record CreateAuditFindingBody(string Title);
 }
 
