@@ -1,0 +1,38 @@
+@use '../../../shared/styles/public-brand' as *;
+
+.public-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $public-bg;
+  color: $public-text;
+}
+
+main {
+  flex: 1;
+  padding: 2.5rem 0 3rem;
+  h1 {
+    font-family: $public-font-heading;
+    color: $public-primary;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-top: 0;
+  }
+  h2 {
+    font-family: $public-font-heading;
+    color: $public-primary;
+    font-size: 1.2rem;
+    margin-top: 2rem;
+  }
+  p {
+    line-height: 1.6;
+    color: $public-muted;
+    max-width: 40rem;
+  }
+  a {
+    color: $public-primary;
+  }
+}
+
+.contain {
+  @include public-container;
+}

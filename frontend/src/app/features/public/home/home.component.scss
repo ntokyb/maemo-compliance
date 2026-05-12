@@ -1,0 +1,187 @@
+@use '../../../shared/styles/public-brand' as *;
+
+.public-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $public-bg;
+  color: $public-text;
+}
+
+main {
+  flex: 1;
+}
+
+.contain {
+  @include public-container;
+}
+
+.hero {
+  padding: 3rem 0 3.5rem;
+  h1 {
+    font-family: $public-font-heading;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: $public-primary;
+    line-height: 1.2;
+    max-width: 36rem;
+    margin: 0 0 1rem;
+  }
+  .sub {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: $public-muted;
+    max-width: 38rem;
+    margin: 0 0 1.75rem;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  &.primary {
+    background: $public-primary;
+    color: #fff;
+    border-color: $public-primary;
+  }
+  &.ghost {
+    background: $public-bg;
+    color: $public-primary;
+    border-color: $public-primary;
+  }
+  &.large {
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+.section {
+  padding: 3rem 0;
+  h2 {
+    font-family: $public-font-heading;
+    font-size: 1.5rem;
+    color: $public-primary;
+    margin: 0 0 1.5rem;
+  }
+  &.alt {
+    background: #f6f8fa;
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  background: $public-bg;
+  border: 1px solid $public-border;
+  border-radius: 8px;
+  padding: 1.25rem 1.35rem;
+  h3 {
+    font-family: $public-font-heading;
+    font-size: 1.0625rem;
+    color: $public-primary;
+    margin: 0 0 0.5rem;
+  }
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: $public-muted;
+  }
+}
+
+.section.alt .card {
+  background: #fff;
+}
+
+.pill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  li {
+    padding: 0.65rem 1rem;
+    border-left: 4px solid $public-primary;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+    font-weight: 500;
+  }
+}
+
+.proof-headline {
+  text-align: center;
+  font-weight: 600;
+  color: $public-muted;
+  margin: 0 0 1.5rem;
+}
+
+.logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.logo-placeholder {
+  min-width: 120px;
+  padding: 1rem 1.25rem;
+  border: 1px dashed $public-border;
+  border-radius: 6px;
+  text-align: center;
+  color: $public-muted;
+  font-size: 0.8125rem;
+  span {
+    display: block;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: $public-primary;
+  }
+}
+
+.cta-strip {
+  background: $public-primary;
+  color: #fff;
+  .cta-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  h2 {
+    color: #fff;
+    margin: 0;
+  }
+  .btn.primary {
+    background: #fff;
+    color: $public-primary;
+    border-color: #fff;
+  }
+}
+
+@media (max-width: 375px) {
+  .hero {
+    padding-top: 2rem;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+}

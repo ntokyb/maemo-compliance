@@ -612,6 +612,7 @@ For external integrations, always use `/engine/v1` endpoints.
     app.MapRisksEndpoints();
 
     app.MapPublicSignupEndpoints();
+    app.MapPublicMarketingEndpoints();
 
     // Tenant endpoints (Portal)
     app.MapTenantsEndpoints();

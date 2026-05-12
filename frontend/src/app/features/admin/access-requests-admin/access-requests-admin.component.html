@@ -1,0 +1,82 @@
+<div class="page">
+  <h1>Access requests</h1>
+  <p class="muted">Review organisations requesting access to Maemo Compliance.</p>
+
+  <div class="filters">
+    <button
+      type="button"
+      *ngFor="let f of filterOptions"
+      [class.active]="filter === f"
+      (click)="setFilter(f)"
+    >
+      {{ f }}
+    </button>
+  </div>
+
+  <div *ngIf="loading">Loading…</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Industry</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Standards</th>
+          <th>Created</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.companyName }}</td>
+          <td>{{ r.industry }}</td>
+          <td>{{ r.contactName }}</td>
+          <td>{{ r.contactEmail }}</td>
+          <td class="narrow">{{ r.targetStandardsSummary }}</td>
+          <td>{{ r.createdAt | date: 'mediumDate' }}</td>
+          <td><span class="badge">{{ r.status }}</span></td>
+          <td class="actions">
+            <button type="button" class="linkbtn" *ngIf="r.status === 'Pending'" (click)="openApprove(r)">Approve</button>
+            <button type="button" class="linkbtn danger" *ngIf="r.status === 'Pending'" (click)="openReject(r)">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="rows.length === 0" class="empty">No requests in this filter.</p>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="approveFor" (click)="closeModals()"></div>
+<div class="modal" *ngIf="approveFor" role="dialog" aria-modal="true">
+  <h2>Approve request</h2>
+  <p class="muted">Confirm the company name and choose a plan. An invite will be sent to {{ approveFor.contactEmail }}.</p>
+  <form [formGroup]="approveForm" class="form">
+    <label>Company name</label>
+    <input class="ctrl" formControlName="companyName" />
+    <label>Plan</label>
+    <select class="ctrl" formControlName="plan">
+      <option *ngFor="let p of plans" [value]="p">{{ p }}</option>
+    </select>
+  </form>
+  <div class="modal-actions">
+    <button type="button" class="btn" (click)="closeModals()">Cancel</button>
+    <button type="button" class="btn primary" (click)="confirmApprove()">Confirm and send invite</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="rejectFor" (click)="closeModals()"></div>
+<div class="modal" *ngIf="rejectFor" role="dialog" aria-modal="true">
+  <h2>Reject request</h2>
+  <p class="muted">Optional message to include with the rejection email.</p>
+  <form [formGroup]="rejectForm" class="form">
+    <label>Reason</label>
+    <textarea class="ctrl" rows="3" formControlName="reason"></textarea>
+  </form>
+  <div class="modal-actions">
+    <button type="button" class="btn" (click)="closeModals()">Cancel</button>
+    <button type="button" class="btn danger" (click)="confirmReject()">Confirm rejection</button>
+  </div>
+</div>

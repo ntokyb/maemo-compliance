@@ -55,6 +55,13 @@
         <a *ngIf="hasModule('Audits')" routerLink="/audits" routerLinkActive="active" class="nav-link">Audits</a>
         
         <div class="nav-section-divider"></div>
+        <div class="nav-section-header">Platform</div>
+        <a *ngIf="isPlatformAdmin" routerLink="/admin/access-requests" routerLinkActive="active" class="nav-link">
+          Access requests
+          <span class="nav-badge" *ngIf="pendingAccessRequests() > 0">{{ pendingAccessRequests() }}</span>
+        </a>
+
+        <div class="nav-section-divider"></div>
         <div class="nav-section-header">Admin</div>
         <a routerLink="/admin/tenant-settings" routerLinkActive="active" class="nav-link">Tenant Settings</a>
         <a routerLink="/admin/m365-connection" routerLinkActive="active" class="nav-link">Microsoft 365 Integration</a>
@@ -75,7 +82,4 @@
 <app-toast></app-toast>
     </main>
   </div>
-
-  <!-- Onboarding Wizard Modal -->
-  <app-onboarding-wizard *ngIf="showOnboardingWizard" (onComplete)="onOnboardingComplete()"></app-onboarding-wizard>
 </div>

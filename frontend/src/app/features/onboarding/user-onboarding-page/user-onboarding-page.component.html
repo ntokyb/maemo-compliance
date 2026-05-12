@@ -1,0 +1,83 @@
+<div class="onboarding-page">
+  <div class="panel">
+    <p class="muted" *ngIf="loadError">{{ loadError }}</p>
+
+    <ng-container [ngSwitch]="step">
+      <section *ngSwitchCase="1">
+        <h1>Complete your profile</h1>
+        <p class="lead">Tell us who you are so your team recognises you.</p>
+        <form [formGroup]="step1" class="form">
+          <label>First name <span class="req">*</span></label>
+          <input class="ctrl" formControlName="firstName" />
+          <label>Last name <span class="req">*</span></label>
+          <input class="ctrl" formControlName="lastName" />
+          <label>Job title</label>
+          <input class="ctrl" formControlName="jobTitle" />
+          <label>Phone</label>
+          <input class="ctrl" formControlName="phone" />
+        </form>
+      </section>
+
+      <section *ngSwitchCase="2">
+        <h1>Set up your organisation</h1>
+        <p class="lead">Optional branding and where you operate from.</p>
+        <form [formGroup]="step2" class="form">
+          <label>Organisation name (optional)</label>
+          <input class="ctrl" formControlName="organisationName" />
+          <label>Logo URL (optional)</label>
+          <input class="ctrl" formControlName="logoUrl" placeholder="https://…" />
+          <label>Address &amp; primary contact</label>
+          <textarea class="ctrl" rows="3" formControlName="organisationAddress" placeholder="Street, city, and main contact if different from you"></textarea>
+        </form>
+      </section>
+
+      <section *ngSwitchCase="3">
+        <h1>Your compliance focus</h1>
+        <p class="lead">Which ISO standards are you working towards?</p>
+        <form [formGroup]="step3" class="form checkgrid">
+          <label class="chk"><input type="checkbox" formControlName="iso9001" /> ISO 9001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso14001" /> ISO 14001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso45001" /> ISO 45001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso27001" /> ISO 27001</label>
+          <label class="chk"><input type="checkbox" formControlName="isoOther" /> Other</label>
+        </form>
+      </section>
+
+      <section *ngSwitchCase="4">
+        <h1>Invite your team</h1>
+        <p class="lead">Add up to five colleague emails. They will receive an invitation to this workspace.</p>
+        <form [formGroup]="step4" class="form">
+          <label>Email 1</label>
+          <input type="email" class="ctrl" formControlName="e1" />
+          <label>Email 2</label>
+          <input type="email" class="ctrl" formControlName="e2" />
+          <label>Email 3</label>
+          <input type="email" class="ctrl" formControlName="e3" />
+          <label>Email 4</label>
+          <input type="email" class="ctrl" formControlName="e4" />
+          <label>Email 5</label>
+          <input type="email" class="ctrl" formControlName="e5" />
+        </form>
+      </section>
+
+      <section *ngSwitchCase="5">
+        <h1>You are ready to start</h1>
+        <p class="lead">Your workspace is set up. Continue to the dashboard when you are ready.</p>
+        <button type="button" class="btn primary" (click)="goDashboard()">Go to dashboard</button>
+      </section>
+    </ng-container>
+
+    <div class="actions" *ngIf="step >= 1 && step <= 4">
+      <button type="button" class="btn" (click)="back()" [disabled]="step === 1 || loading">Back</button>
+      <ng-container *ngIf="step < 4">
+        <button type="button" class="btn primary" (click)="next()" [disabled]="loading">Continue</button>
+      </ng-container>
+      <ng-container *ngIf="step === 4">
+        <button type="button" class="btn" (click)="skipInvites()" [disabled]="loading">Skip for now</button>
+        <button type="button" class="btn primary" (click)="sendInvites()" [disabled]="loading">
+          {{ loading ? 'Saving…' : 'Send invites' }}
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</div>

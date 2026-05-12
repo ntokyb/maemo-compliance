@@ -1,0 +1,23 @@
+<div class="public-page">
+  <app-public-header />
+  <main class="contain">
+    <h1>Contact us</h1>
+    <p class="lead">Send a message to the Maemo Compliance team. We typically reply within one business day.</p>
+
+    <div *ngIf="done" class="banner ok">Thank you — your message has been sent.</div>
+    <div *ngIf="error" class="banner err">{{ error }}</div>
+
+    <form *ngIf="!done" [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <label>Name <span class="req">*</span></label>
+      <input type="text" formControlName="name" class="ctrl" autocomplete="name" />
+      <label>Company</label>
+      <input type="text" formControlName="company" class="ctrl" />
+      <label>Email <span class="req">*</span></label>
+      <input type="email" formControlName="email" class="ctrl" autocomplete="email" />
+      <label>Message <span class="req">*</span></label>
+      <textarea formControlName="message" class="ctrl" rows="5"></textarea>
+      <button type="submit" class="btn primary" [disabled]="submitting">{{ submitting ? 'Sending…' : 'Send message' }}</button>
+    </form>
+  </main>
+  <app-public-footer />
+</div>

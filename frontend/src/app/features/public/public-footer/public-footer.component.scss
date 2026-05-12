@@ -1,0 +1,55 @@
+@use '../../../shared/styles/public-brand' as *;
+
+.site-footer {
+  background: $public-bg;
+  border-top: 1px solid $public-border;
+  padding: 2rem 0 2.5rem;
+  margin-top: auto;
+}
+
+.inner {
+  @include public-container;
+}
+
+.row {
+  font-family: $public-font-heading;
+  font-size: 0.9375rem;
+  color: $public-text;
+  margin-bottom: 0.75rem;
+  .name {
+    font-weight: 600;
+  }
+  .sep {
+    margin: 0 0.35rem;
+    color: $public-muted;
+  }
+  .byline {
+    color: $public-muted;
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+  a {
+    color: $public-primary;
+    text-decoration: none;
+  }
+  .muted {
+    font-size: 0.875rem;
+    color: $public-muted;
+    a {
+      color: $public-primary;
+    }
+  }
+}
+
+.email {
+  margin: 0;
+  font-size: 0.875rem;
+  a {
+    color: $public-primary;
+  }
+}

@@ -4,6 +4,10 @@ using MaemoCompliance.Application.Tenants.Commands;
 using MaemoCompliance.Application.Tenants.Queries;
 using MediatR;
 
+using System.Text.Json;
+using MaemoCompliance.Application.Users.Commands;
+using MaemoCompliance.Application.Users.Queries;
+
 namespace MaemoCompliance.Api.Portal;
 
 public sealed record UpdateTenantPortalGeneralApiRequest(
@@ -20,6 +24,17 @@ public sealed record UpdateTenantSharePointSelfApiRequest(
 public sealed record InviteUserApiRequest(string Email, string Role);
 
 public sealed record AcceptInviteApiRequest(string Token);
+
+public sealed record CompleteUserOnboardingWizardApiRequest(
+    string FirstName,
+    string LastName,
+    string? JobTitle,
+    string? Phone,
+    string? OrganisationAddress,
+    string? OrganisationName,
+    string? LogoUrl,
+    string[]? Standards,
+    string[]? TeamEmails);
 
 /// <summary>
 /// Tenant self-service routes under /api/tenant (current tenant from context).
@@ -162,6 +177,48 @@ public static class TenantSelfServiceEndpoints
         .Produces(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status404NotFound);
 
+        var meProfile = group.MapGet("/me", async (ISender sender, CancellationToken ct) =>
+        {
+            var dto = await sender.Send(new GetCurrentUserProfileQuery(), ct);
+            return dto == null ? Results.NotFound() : Results.Ok(dto);
+        })
+        .WithName("Tenant_MeProfile")
+        .WithOpenApi();
+
+        var completeWizard = group.MapPost("/onboarding/complete-wizard", async (
+            CompleteUserOnboardingWizardApiRequest body,
+            ISender sender,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                await sender.Send(
+                    new CompleteUserOnboardingWizardCommand(
+                        body.FirstName,
+                        body.LastName,
+                        body.JobTitle,
+                        body.Phone,
+                        body.OrganisationAddress,
+                        body.OrganisationName,
+                        body.LogoUrl,
+                        body.Standards ?? Array.Empty<string>(),
+                        body.TeamEmails),
+                    ct);
+                return Results.NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return ErrorResults.BadRequest("OnboardingFailed", ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return ErrorResults.NotFound("UserNotFound", ex.Message);
+            }
+        })
+        .WithName("Tenant_CompleteOnboardingWizard")
+        .WithOpenApi()
+        .Produces(StatusCodes.Status204NoContent);
+
         var sharePoint = group.MapPut("/sharepoint", async (
             UpdateTenantSharePointSelfApiRequest request,
             ITenantProvider tenantProvider,
@@ -233,6 +290,8 @@ public static class TenantSelfServiceEndpoints
             onboardingStatus.RequireAuthorization();
             onboardingDismiss.RequireAuthorization();
             acceptInvite.RequireAuthorization();
+            meProfile.RequireAuthorization();
+            completeWizard.RequireAuthorization();
             directory.RequireAuthorization("RequireTenantAdmin");
             invite.RequireAuthorization("RequireTenantAdmin");
             settings.RequireAuthorization("RequireTenantAdmin");

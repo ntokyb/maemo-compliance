@@ -11,14 +11,14 @@ import { TenantContextService } from '../../services/tenant-context.service';
 import { TenantModulesService } from '../../services/tenant-modules.service';
 import { BrandingService } from '../../services/branding.service';
 import { ConsultantClientService, ConsultantClientDto } from '../../services/consultant-client.service';
+import { HttpClient } from '@angular/common/http';
 import { ToastComponent } from '../../shared/toast/toast.component';
-import { OnboardingWizardComponent } from '../onboarding-wizard/onboarding-wizard';
-import { OnboardingService } from '../../services/onboarding.service';
 import { OfflineBannerComponent } from '../offline-banner/offline-banner';
+import { PlatformAdminService } from '../../services/platform-admin.service';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FormsModule, ToastComponent, OnboardingWizardComponent, OfflineBannerComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FormsModule, ToastComponent, OfflineBannerComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
@@ -30,7 +30,8 @@ export class Layout implements OnInit, OnDestroy {
   private router = inject(Router);
   private brandingService = inject(BrandingService);
   private consultantClientService = inject(ConsultantClientService);
-  private onboardingService = inject(OnboardingService);
+  private platformAdminService = inject(PlatformAdminService);
+  private http = inject(HttpClient);
 
   activeAccount = signal<AccountInfo | null>(null);
   displayName = computed(() => {
@@ -40,7 +41,7 @@ export class Layout implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  showOnboardingWizard = false;
+  pendingAccessRequests = signal(0);
 
   clients: ConsultantClientDto[] = [];
   selectedClientId: string | null = null;
@@ -65,6 +66,10 @@ export class Layout implements OnInit, OnDestroy {
 
   hasModule(moduleName: string): boolean {
     return this.tenantModulesService.hasModule(moduleName);
+  }
+
+  get isPlatformAdmin(): boolean {
+    return this.platformAdminService.isPlatformAdmin();
   }
 
   login(): void {
@@ -103,7 +108,12 @@ export class Layout implements OnInit, OnDestroy {
               msg.eventType === EventType.ACTIVE_ACCOUNT_CHANGED
           )
         )
-        .subscribe(() => this.syncActiveAccount())
+        .subscribe(() => {
+          this.syncActiveAccount();
+          if (this.platformAdminService.isPlatformAdmin()) {
+            this.refreshPendingAccessCount();
+          }
+        })
     );
     this.syncActiveAccount();
 
@@ -126,31 +136,16 @@ export class Layout implements OnInit, OnDestroy {
       this.checkConsultantStatus();
     });
 
-    // Check onboarding status for non-consultant users
-    if (!this.isConsultant && this.currentTenantId) {
-      this.checkOnboardingStatus();
+    if (this.isPlatformAdmin) {
+      this.refreshPendingAccessCount();
     }
   }
 
-  private checkOnboardingStatus(): void {
-    this.onboardingService.getStatus().subscribe({
-      next: (status) => {
-        if (!status.onboardingCompleted) {
-          this.showOnboardingWizard = true;
-        }
-      },
-      error: (err) => {
-        // If error, assume onboarding not completed (for new tenants)
-        console.error('Error checking onboarding status:', err);
-        // Don't show wizard on error - let user proceed
-      }
+  private refreshPendingAccessCount(): void {
+    this.http.get<{ pending: number }>(`${environment.apiBaseUrl}/admin/v1/access-requests/pending-count`).subscribe({
+      next: (r) => this.pendingAccessRequests.set(r.pending ?? 0),
+      error: () => this.pendingAccessRequests.set(0)
     });
-  }
-
-  onOnboardingComplete(): void {
-    this.showOnboardingWizard = false;
-    // Reload page to refresh data
-    window.location.reload();
   }
 
   ngOnDestroy(): void {

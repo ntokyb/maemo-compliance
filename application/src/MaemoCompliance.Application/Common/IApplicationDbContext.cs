@@ -5,6 +5,7 @@ using MaemoCompliance.Domain.Logging;
 using MaemoCompliance.Domain.Ncrs;
 using MaemoCompliance.Domain.Risks;
 using MaemoCompliance.Domain.Mail;
+using MaemoCompliance.Domain.AccessRequests;
 using MaemoCompliance.Domain.Tenants;
 using MaemoCompliance.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace MaemoCompliance.Application.Common;
 
 public interface IApplicationDbContext
 {
+    DbSet<AccessRequest> AccessRequests { get; }
     DbSet<Tenant> Tenants { get; }
     DbSet<Department> Departments { get; }
     DbSet<TenantSettings> TenantSettings { get; }

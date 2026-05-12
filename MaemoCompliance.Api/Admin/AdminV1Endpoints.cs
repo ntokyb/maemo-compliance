@@ -36,6 +36,7 @@ public static class AdminV1Endpoints
         group.MapAdminWorkersEndpoints();
         group.MapAdminBillingEndpoints();
         group.MapAdminLogsEndpoints();
+        group.MapAdminAccessRequestEndpoints();
 
         return endpoints;
     }

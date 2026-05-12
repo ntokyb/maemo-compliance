@@ -1,4 +1,5 @@
 using MaemoCompliance.Application.Common;
+using MaemoCompliance.Domain.AccessRequests;
 using MaemoCompliance.Domain.AuditLog;
 using MaemoCompliance.Domain.Audits;
 using MaemoCompliance.Domain.Common;
@@ -30,6 +31,7 @@ public class MaemoComplianceDbContext : DbContext, IApplicationDbContext
         _currentTenantId.Value = tenantProvider.GetCurrentTenantId();
     }
 
+    public DbSet<AccessRequest> AccessRequests { get; set; } = null!;
     public DbSet<Tenant> Tenants { get; set; } = null!;
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<TenantSettings> TenantSettings { get; set; } = null!;

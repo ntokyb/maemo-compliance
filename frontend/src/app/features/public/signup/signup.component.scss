@@ -1,149 +1,99 @@
-.signup-wrap {
+@use '../../../shared/styles/public-brand' as *;
+
+.public-page {
   min-height: 100vh;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 1rem;
-  background: #f4f6f8;
+  flex-direction: column;
+  background: $public-bg;
+  color: $public-text;
 }
 
-.signup-card {
-  width: 100%;
-  max-width: 520px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-
-  h1 {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
-  }
-
-  h2 {
-    font-size: 1.15rem;
-    margin: 0 0 1rem;
-  }
+main {
+  flex: 1;
+  padding: 2.5rem 0 3rem;
 }
 
-.muted {
-  color: #666;
+.contain {
+  @include public-container;
+  max-width: 36rem;
+}
+
+h1 {
+  font-family: $public-font-heading;
+  color: $public-primary;
+  margin-top: 0;
+}
+
+.lead {
+  color: $public-muted;
+  line-height: 1.55;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1rem;
 }
 
 label {
-  display: block;
-  margin-top: 1rem;
-  font-weight: 500;
-}
-
-.req {
-  color: #c00;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  .req {
+    color: #b00020;
+  }
 }
 
 .ctrl {
-  width: 100%;
-  margin-top: 0.35rem;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid #ccc;
+  border: 1px solid $public-border;
   border-radius: 4px;
+  padding: 0.55rem 0.65rem;
+  font-size: 1rem;
 }
 
 .iso {
-  margin-top: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
-
+  border: 1px solid $public-border;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0.75rem 0;
   legend {
-    padding: 0 0.35rem;
     font-weight: 600;
+    padding: 0 0.35rem;
   }
-
   .chk {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    display: block;
+    margin: 0.35rem 0;
     font-weight: 400;
   }
 }
 
-.radio {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  font-weight: 400;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.5rem;
-  gap: 1rem;
-}
-
 .btn {
-  padding: 0.55rem 1.1rem;
+  margin-top: 1rem;
+  align-self: flex-start;
+  background: $public-primary;
+  color: #fff;
+  border: none;
   border-radius: 4px;
-  border: 1px solid #999;
-  background: #fff;
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
   cursor: pointer;
-
-  &.primary {
-    background: #1976d2;
-    color: #fff;
-    border-color: #1976d2;
-  }
-
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
 }
 
-.link {
-  color: #1976d2;
-}
-
-.note {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.review dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 0.35rem 1rem;
-  font-size: 0.95rem;
-
-  dt {
-    margin: 0;
-    color: #666;
-  }
-
-  dd {
-    margin: 0;
-  }
-}
-
-.alert.error {
-  background: #ffebee;
-  border: 1px solid #ffcdd2;
-  color: #b71c1c;
-  padding: 0.75rem;
+.banner {
+  padding: 0.85rem 1rem;
   border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.field-error {
-  font-size: 0.8rem;
-  color: #c00;
-}
-
-.success {
-  text-align: left;
+  margin: 1rem 0;
+  &.ok {
+    background: #e8f5e9;
+    color: #1b5e20;
+  }
+  &.err {
+    background: #ffebee;
+    color: #b71c1c;
+  }
 }

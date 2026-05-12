@@ -30,8 +30,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.TenantId);
 
-        builder.Property(u => u.LastLoginAt)
-            .HasColumnType("datetime2");
+        builder.Property(u => u.LastLoginAt);
+
+        builder.Property(u => u.OnboardingComplete)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.JobTitle).HasMaxLength(200);
+        builder.Property(u => u.Phone).HasMaxLength(50);
+        builder.Property(u => u.AddressLine).HasMaxLength(500);
+
+        builder.Property(u => u.ComplianceStandardsJson).HasMaxLength(2000);
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();

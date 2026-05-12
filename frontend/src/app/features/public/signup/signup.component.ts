@@ -1,122 +1,116 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { PublicHeaderComponent } from '../public-header/public-header.component';
+import { PublicFooterComponent } from '../public-footer/public-footer.component';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, PublicHeaderComponent, PublicFooterComponent],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss'
 })
 export class SignupComponent {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
-  private router = inject(Router);
 
-  step = 1;
+  industries = [
+    'Manufacturing',
+    'Construction',
+    'Healthcare',
+    'Food & Beverage',
+    'Professional Services',
+    'Mining & Resources',
+    'Other'
+  ];
+
+  companySizes = ['1-10', '11-50', '51-200', '200+'];
+
+  roles = [
+    'Compliance Manager',
+    'Quality Manager',
+    'Operations Manager',
+    'Director/CEO',
+    'Consultant',
+    'Other'
+  ];
+
+  standardsOptions = ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ISO 27001', 'Other'];
+
+  referralOptions = ['Google', 'LinkedIn', 'Referral', 'WhatsApp', 'Other'];
+
   submitting = false;
   error: string | null = null;
-  successEmail: string | null = null;
+  success = false;
 
-  industries = ['Manufacturing', 'Healthcare', 'Financial Services', 'Government', 'Other'];
-
-  companyForm = this.fb.group({
+  form = this.fb.nonNullable.group({
     companyName: ['', [Validators.required, Validators.maxLength(200)]],
     industry: ['Manufacturing', Validators.required],
-    plan: ['Starter', Validators.required],
-    iso9001: [true],
+    companySize: ['1-10', Validators.required],
+    contactName: ['', [Validators.required, Validators.maxLength(200)]],
+    contactEmail: ['', [Validators.required, Validators.email, Validators.maxLength(250)]],
+    contactRole: ['Compliance Manager', Validators.required],
+    referralSource: ['Google', Validators.required],
+    iso9001: [false],
     iso14001: [false],
-    iso27001: [false],
     iso45001: [false],
-    iso31000: [false]
+    iso27001: [false],
+    isoOther: [false]
   });
 
-  adminForm = this.fb.group({
-    firstName: ['', [Validators.required, Validators.maxLength(100)]],
-    lastName: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(250)]]
-  });
-
-  nextFromCompany(): void {
-    if (this.companyForm.invalid) {
-      this.companyForm.markAllAsTouched();
-      return;
-    }
-    if (this.companyForm.value.plan === 'GovOnPrem') {
-      this.error = 'Government / on-premise deployments are provisioned by the Maemo team. Please contact sales.';
-      return;
-    }
-    this.error = null;
-    this.step = 2;
-  }
-
-  nextFromAdmin(): void {
-    if (this.adminForm.invalid) {
-      this.adminForm.markAllAsTouched();
-      return;
-    }
-    this.error = null;
-    this.step = 3;
-  }
-
-  back(): void {
-    this.error = null;
-    if (this.step > 1) {
-      this.step--;
-    }
-  }
-
-  isoList(): string[] {
-    const c = this.companyForm.value;
-    const keys: string[] = [];
-    if (c.iso9001) keys.push('ISO 9001');
-    if (c.iso14001) keys.push('ISO 14001');
-    if (c.iso27001) keys.push('ISO 27001');
-    if (c.iso45001) keys.push('ISO 45001');
-    if (c.iso31000) keys.push('ISO 31000');
-    return keys;
+  targetStandards(): string[] {
+    const v = this.form.getRawValue();
+    const out: string[] = [];
+    if (v.iso9001) out.push('ISO 9001');
+    if (v.iso14001) out.push('ISO 14001');
+    if (v.iso45001) out.push('ISO 45001');
+    if (v.iso27001) out.push('ISO 27001');
+    if (v.isoOther) out.push('Other');
+    return out;
   }
 
   submit(): void {
-    if (this.companyForm.invalid || this.adminForm.invalid) {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
-    this.submitting = true;
+    const standards = this.targetStandards();
+    if (standards.length === 0) {
+      this.error = 'Select at least one ISO standard you are targeting.';
+      return;
+    }
     this.error = null;
-
+    this.submitting = true;
+    const v = this.form.getRawValue();
     const body = {
-      companyName: this.companyForm.value.companyName!.trim(),
-      adminEmail: this.adminForm.value.email!.trim(),
-      adminFirstName: this.adminForm.value.firstName!.trim(),
-      adminLastName: this.adminForm.value.lastName!.trim(),
-      industry: this.companyForm.value.industry!,
-      plan: this.companyForm.value.plan!,
-      isoFrameworks: this.isoList()
+      companyName: v.companyName.trim(),
+      industry: v.industry,
+      companySize: v.companySize,
+      contactName: v.contactName.trim(),
+      contactEmail: v.contactEmail.trim(),
+      contactRole: v.contactRole,
+      targetStandards: standards,
+      referralSource: v.referralSource
     };
 
-    this.http
-      .post<{ tenantId: string; message: string; nextStep: string }>(
-        `${environment.apiBaseUrl}/public/signup`,
-        body
-      )
-      .subscribe({
-        next: () => {
-          this.submitting = false;
-          this.successEmail = this.adminForm.value.email!.trim();
-        },
-        error: (err) => {
-          this.submitting = false;
-          this.error =
-            err.error?.message || err.message || 'Signup failed. Please try again or contact support.';
+    this.http.post(`${environment.apiBaseUrl}/api/public/request-access`, body).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.success = true;
+      },
+      error: (err) => {
+        this.submitting = false;
+        if (err.status === 409) {
+          this.error = 'A pending request already exists for this email.';
+        } else if (err.status === 429) {
+          this.error = 'Too many requests. Please try again later.';
+        } else {
+          this.error = err.error?.message || err.message || 'Request failed. Please try again.';
         }
-      });
-  }
-
-  goToLogin(): void {
-    this.router.navigate(['/login']);
+      }
+    });
   }
 }

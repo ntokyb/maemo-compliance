@@ -1,0 +1,58 @@
+@use '../../../shared/styles/public-brand' as *;
+
+.site-header {
+  background: $public-bg;
+  border-bottom: 1px solid $public-border;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.inner {
+  @include public-container;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-family: $public-font-heading;
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: $public-primary;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+
+  a {
+    color: $public-text;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    &.active {
+      color: $public-primary;
+      font-weight: 600;
+    }
+    &.cta {
+      background: $public-primary;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

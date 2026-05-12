@@ -13,5 +13,17 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
 
     public DateTime? LastLoginAt { get; set; }
+
+    /// <summary>First-run wizard after accepting an invite; independent of tenant onboarding checklist.</summary>
+    public bool OnboardingComplete { get; set; }
+
+    public string? JobTitle { get; set; }
+    public string? Phone { get; set; }
+
+    /// <summary>Optional address captured during user onboarding.</summary>
+    public string? AddressLine { get; set; }
+
+    /// <summary>JSON array from onboarding wizard (e.g. ISO standards).</summary>
+    public string? ComplianceStandardsJson { get; set; }
 }
 

@@ -1,0 +1,72 @@
+<div class="public-page">
+  <app-public-header />
+  <main>
+    <section class="hero">
+      <div class="contain">
+        <h1>Compliance management built for South African business</h1>
+        <p class="sub">
+          Document control, non-conformances, risk register, and audits — in one platform. Built for ISO 9001, 14001,
+          and 45001.
+        </p>
+        <div class="hero-actions">
+          <button type="button" class="btn primary" (click)="scrollTo('signup')">Request access</button>
+          <button type="button" class="btn ghost" (click)="scrollTo('features')">See how it works</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="contain">
+        <h2>What you get</h2>
+        <div class="card-grid">
+          <article class="card">
+            <h3>Document Control</h3>
+            <p>
+              Upload, version, approve, and archive all your controlled documents. Full audit trail.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Non-Conformances</h3>
+            <p>Capture NCRs, assign root cause analysis, track corrective actions to closure.</p>
+          </article>
+          <article class="card">
+            <h3>Audits &amp; Risk</h3>
+            <p>Schedule internal audits, record findings, manage your risk register — all in one place.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="contain">
+        <h2>Who it is for</h2>
+        <ul class="pill-list">
+          <li>ISO 9001 Quality Management</li>
+          <li>ISO 14001 Environmental</li>
+          <li>ISO 45001 Health &amp; Safety</li>
+          <li>POPIA Document Compliance</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section proof">
+      <div class="contain">
+        <p class="proof-headline">Used by compliance teams across South Africa</p>
+        <div class="logo-strip" aria-hidden="true">
+          <div class="logo-placeholder"><span>◇</span> Industrial</div>
+          <div class="logo-placeholder"><span>◎</span> Services</div>
+          <div class="logo-placeholder"><span>▣</span> Manufacturing</div>
+          <div class="logo-placeholder"><span>◆</span> Healthcare</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-strip" id="signup">
+      <div class="contain cta-inner">
+        <h2>Ready to get compliant?</h2>
+        <a routerLink="/signup" class="btn primary large">Request access</a>
+      </div>
+    </section>
+  </main>
+  <app-public-footer />
+</div>

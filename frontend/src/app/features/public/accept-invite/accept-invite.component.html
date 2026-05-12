@@ -11,17 +11,17 @@
 
     <div *ngIf="!loading && preview?.valid && !done">
       <p *ngIf="preview?.companyName">
-        You've been invited to <strong>{{ preview?.companyName }}</strong>
+        You have been invited to join <strong>{{ preview?.companyName }}</strong> on Maemo Compliance.
       </p>
-      <p *ngIf="preview?.email">Email: {{ preview?.email }}</p>
+      <p *ngIf="preview?.email"><strong>Email:</strong> {{ preview?.email }}</p>
 
       <ng-container *ngIf="!auth.isAuthenticated(); else acceptBlock">
         <p>Sign in with your Microsoft work account that matches this email.</p>
-        <button type="button" class="btn primary" (click)="login()">Sign in</button>
+        <button type="button" class="btn primary" (click)="login()">Accept invite and log in</button>
       </ng-container>
       <ng-template #acceptBlock>
         <button type="button" class="btn primary" (click)="accept()" [disabled]="acceptLoading">
-          {{ acceptLoading ? 'Joining…' : 'Join workspace' }}
+          {{ acceptLoading ? 'Joining…' : 'Accept invite and log in' }}
         </button>
         <p *ngIf="acceptError" class="err">{{ acceptError }}</p>
       </ng-template>

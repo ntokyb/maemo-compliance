@@ -1,0 +1,13 @@
+$public-primary: #0f4c81;
+$public-bg: #ffffff;
+$public-text: #1a1a1a;
+$public-muted: #5c6670;
+$public-border: #e2e6ea;
+$public-font-heading: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+@mixin public-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
