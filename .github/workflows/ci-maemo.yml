@@ -1,4 +1,4 @@
-name: CI - Maemo
+name: CI - Maemo Compliance
 
 on:
   push:
@@ -33,16 +33,16 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore NuGet packages
-        run: dotnet restore Maemo.sln
+        run: dotnet restore MaemoCompliance.sln
 
       - name: Build solution
-        run: dotnet build Maemo.sln --configuration Release --no-restore
+        run: dotnet build MaemoCompliance.sln --configuration Release --no-restore
 
       - name: Run unit tests
-        run: dotnet test Maemo.UnitTests/Maemo.UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-tests.trx" --logger "console;verbosity=normal"
+        run: dotnet test MaemoCompliance.UnitTests/MaemoCompliance.UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-tests.trx" --logger "console;verbosity=normal"
 
       - name: Run integration tests
-        run: dotnet test Maemo.IntegrationTests/Maemo.IntegrationTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --logger "console;verbosity=normal"
+        run: dotnet test MaemoCompliance.IntegrationTests/MaemoCompliance.IntegrationTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --logger "console;verbosity=normal"
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -65,21 +65,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Maemo.Api image
+      - name: Build MaemoCompliance.Api image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: ./Maemo.Api/Dockerfile
+          file: ./MaemoCompliance.Api/Dockerfile
           push: false
           tags: maemo-api:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build Maemo.Workers image
+      - name: Build MaemoCompliance.Workers image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./workers/src/Maemo.Workers/Dockerfile
+          file: ./workers/src/MaemoCompliance.Workers/Dockerfile
           push: false
           tags: maemo-workers:ci
           cache-from: type=gha

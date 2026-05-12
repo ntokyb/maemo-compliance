@@ -1,5 +1,5 @@
-# Maemo: .NET 8 backend (Maemo.sln) + Angular portal (frontend/).
-# Tests: Maemo.UnitTests / Maemo.IntegrationTests (Testcontainers; Docker on runner).
+# maemo-compliance: .NET 8 backend (MaemoCompliance.sln) + Angular portal (frontend/).
+# Tests: MaemoCompliance.UnitTests / MaemoCompliance.IntegrationTests (Testcontainers; Docker on runner).
 # When you add Playwright E2E, reintroduce a job like the template (chromium + STAGING_URL).
 
 name: CI
@@ -25,11 +25,11 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build solution
-        run: dotnet build Maemo.sln -c Release
+        run: dotnet build MaemoCompliance.sln -c Release
 
-      # Maemo uses separate test projects (no xUnit Category=Unit/Integration traits).
+      # Separate test projects (no xUnit Category=Unit/Integration traits).
       - name: Run unit tests
-        run: dotnet test Maemo.UnitTests/Maemo.UnitTests.csproj -c Release --no-build
+        run: dotnet test MaemoCompliance.UnitTests/MaemoCompliance.UnitTests.csproj -c Release --no-build
 
   integration:
     runs-on: ubuntu-latest
@@ -43,10 +43,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build solution
-        run: dotnet build Maemo.sln -c Release
+        run: dotnet build MaemoCompliance.sln -c Release
 
       - name: Run integration tests
-        run: dotnet test Maemo.IntegrationTests/Maemo.IntegrationTests.csproj -c Release --no-build
+        run: dotnet test MaemoCompliance.IntegrationTests/MaemoCompliance.IntegrationTests.csproj -c Release --no-build
         env:
           # GitHub-hosted runners: Docker is available for Testcontainers PostgreSQL.
           TESTCONTAINERS_RYUK_DISABLED: true
@@ -83,8 +83,8 @@ jobs:
     if: false # Enable when deploy is defined: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy (configure for Maemo)
+      - name: Deploy (configure for maemo-compliance)
         run: |
-          echo "Define deploy: e.g. docker build/push, or SSH to Hetzner with a deploy key secret."
+          echo "Define deploy: e.g. docker build/push ghcr.io/ntokyb/maemo-compliance-*, or SSH to Hetzner."
           echo "Example: ssh -i ~/.ssh/key user@host 'cd /app && git pull && docker compose up -d'"
           exit 0

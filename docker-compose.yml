@@ -4,7 +4,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: maemo-postgres
+    container_name: maemo-compliance-postgres
     environment:
       POSTGRES_DB: maemo
       POSTGRES_USER: maemo
@@ -12,8 +12,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      # Distinct name avoids clashing with older compose volumes (different DB user/password)
-      - maemo_dev_postgres_data:/var/lib/postgresql/data
+      - maemo_compliance_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U maemo"]
       interval: 10s
@@ -23,8 +22,9 @@ services:
   api:
     build:
       context: .
-      dockerfile: Maemo.Api/Dockerfile
-    container_name: maemo-api
+      dockerfile: MaemoCompliance.Api/Dockerfile
+    image: ghcr.io/ntokyb/maemo-compliance-api:local
+    container_name: maemo-compliance-api
     ports:
       - "8080:8080"
     environment:
@@ -33,10 +33,10 @@ services:
       Storage__ForceLocalFileStorage: "true"
       Storage__LocalBasePath: /app/files
       Authentication__Authority: ${AZURE_AUTHORITY:-https://login.microsoftonline.com/common/v2.0}
-      Authentication__Audience: ${AZURE_AUDIENCE:-api://maemo-api-placeholder}
+      Authentication__Audience: ${AZURE_AUDIENCE:-api://maemo-api-client-id}
       Admin__DemoSeedApiKey: ${ADMIN__DEMO_SEED_API_KEY:-}
     volumes:
-      - file_storage:/app/files
+      - maemo_compliance_file_storage:/app/files
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,15 +50,16 @@ services:
   workers:
     build:
       context: .
-      dockerfile: workers/src/Maemo.Workers/Dockerfile
-    container_name: maemo-workers
+      dockerfile: workers/src/MaemoCompliance.Workers/Dockerfile
+    image: ghcr.io/ntokyb/maemo-compliance-workers:local
+    container_name: maemo-compliance-workers
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__MaemoDatabase: "Host=postgres;Port=5432;Database=maemo;Username=maemo;Password=maemo_dev_password"
       Storage__ForceLocalFileStorage: "true"
       Storage__LocalBasePath: /app/files
     volumes:
-      - file_storage:/app/files
+      - maemo_compliance_file_storage:/app/files
     depends_on:
       api:
         condition: service_healthy
@@ -67,7 +68,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: maemo-frontend
+    image: ghcr.io/ntokyb/maemo-compliance-portal:local
+    container_name: maemo-compliance-portal
     ports:
       - "80:80"
     depends_on:
@@ -75,5 +77,5 @@ services:
         condition: service_healthy
 
 volumes:
-  maemo_dev_postgres_data:
-  file_storage:
+  maemo_compliance_postgres_data:
+  maemo_compliance_file_storage:

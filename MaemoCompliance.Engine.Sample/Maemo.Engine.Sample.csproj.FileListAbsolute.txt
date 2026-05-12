@@ -1,0 +1,14 @@
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\bin\Debug\net8.0\MaemoCompliance.Engine.Sample.exe
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\bin\Debug\net8.0\MaemoCompliance.Engine.Sample.deps.json
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\bin\Debug\net8.0\MaemoCompliance.Engine.Sample.runtimeconfig.json
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\bin\Debug\net8.0\MaemoCompliance.Engine.Sample.dll
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\bin\Debug\net8.0\MaemoCompliance.Engine.Sample.pdb
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.GeneratedMSBuildEditorConfig.editorconfig
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.AssemblyInfoInputs.cache
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.AssemblyInfo.cs
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.csproj.CoreCompileInputs.cache
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.dll
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\refint\MaemoCompliance.Engine.Sample.dll
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.pdb
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\MaemoCompliance.Engine.Sample.genruntimeconfig.cache
+C:\projects\codist\maemo\MaemoCompliance.Api\MaemoCompliance.Engine.Sample\obj\Debug\net8.0\ref\MaemoCompliance.Engine.Sample.dll

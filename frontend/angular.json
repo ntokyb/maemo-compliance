@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "maemo-portal": {
+    "maemo-compliance-portal": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -70,10 +70,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "maemo-portal:build:production"
+              "buildTarget": "maemo-compliance-portal:build:production"
             },
             "development": {
-              "buildTarget": "maemo-portal:build:development"
+              "buildTarget": "maemo-compliance-portal:build:development"
             }
           },
           "defaultConfiguration": "development"

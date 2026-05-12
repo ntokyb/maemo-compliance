@@ -34,14 +34,14 @@ Target users: Quality Managers, Compliance Officers, Consultants, System Adminis
 
 | Module | Description | Location |
 |--------|-------------|----------|
-| **Documents** | Document CRUD, versioning, approval workflow | `Maemo.Api/Portal/DocumentsEndpoints.cs`, `Engine/Documents/` |
-| **NCRs** | Non-conformance reports, status workflow, risk linking | `Maemo.Api/Portal/`, `Engine/Ncrs/` |
-| **Risks** | Risk register, scoring, NCR links | `Maemo.Api/Portal/`, `Engine/Risks/` |
-| **Audits** | Templates, runs, answers, evidence | `Maemo.Api/Portal/AuditsEndpoints.cs`, `Engine/Audits/` |
-| **Tenants** | Multi-tenancy, provisioning, M365 connect | `Maemo.Api/Portal/TenantsEndpoints.cs`, `Admin/` |
-| **Consultants** | Dashboard, clients, branding (partial) | `Maemo.Api/Portal/ConsultantsEndpoints.cs` |
-| **Admin** | Tenant/user management, audit logs, billing (stub) | `Maemo.Api/Admin/` |
-| **Engine API** | Versioned external API (`/engine/v1/*`) | `Maemo.Api/Engine/` |
+| **Documents** | Document CRUD, versioning, approval workflow | `MaemoCompliance.Api/Portal/DocumentsEndpoints.cs`, `Engine/Documents/` |
+| **NCRs** | Non-conformance reports, status workflow, risk linking | `MaemoCompliance.Api/Portal/`, `Engine/Ncrs/` |
+| **Risks** | Risk register, scoring, NCR links | `MaemoCompliance.Api/Portal/`, `Engine/Risks/` |
+| **Audits** | Templates, runs, answers, evidence | `MaemoCompliance.Api/Portal/AuditsEndpoints.cs`, `Engine/Audits/` |
+| **Tenants** | Multi-tenancy, provisioning, M365 connect | `MaemoCompliance.Api/Portal/TenantsEndpoints.cs`, `Admin/` |
+| **Consultants** | Dashboard, clients, branding (partial) | `MaemoCompliance.Api/Portal/ConsultantsEndpoints.cs` |
+| **Admin** | Tenant/user management, audit logs, billing (stub) | `MaemoCompliance.Api/Admin/` |
+| **Engine API** | Versioned external API (`/engine/v1/*`) | `MaemoCompliance.Api/Engine/` |
 
 ---
 
@@ -68,7 +68,7 @@ Target users: Quality Managers, Compliance Officers, Consultants, System Adminis
 
 - **Type:** PostgreSQL 16
 - **ORM:** Entity Framework Core 8.0
-- **Schema:** Migrations in `infrastructure/src/Maemo.Infrastructure/Migrations/`
+- **Schema:** Migrations in `infrastructure/src/MaemoCompliance.Infrastructure/Migrations/`
 - **Migrations:** 15+ migrations from `InitialCreate` through `AddDocumentRetentionFields`, `AddOnboardingFieldsToTenant`, etc.
 - **Strategy:** Auto-apply in Development; production should run `dotnet ef database update` or equivalent
 
@@ -85,8 +85,8 @@ Target users: Quality Managers, Compliance Officers, Consultants, System Adminis
   - Builds solution, runs unit + integration tests
   - Builds Docker images (API, Workers, Frontend)
   - Uses `package-lock.json` for npm cache (may need creation)
-- **Dockerfiles:** `Maemo.Api/Dockerfile`, `workers/src/Maemo.Workers/Dockerfile`, `frontend/Dockerfile`
-- **Note:** API/Workers Dockerfiles use paths like `Maemo.Application/`, `Maemo.Infrastructure/` at repo root; actual paths are `application/src/Maemo.Application/`, `infrastructure/src/Maemo.Infrastructure/` — **Docker builds may fail** (see §6)
+- **Dockerfiles:** `MaemoCompliance.Api/Dockerfile`, `workers/src/MaemoCompliance.Workers/Dockerfile`, `frontend/Dockerfile`
+- **Note:** API/Workers Dockerfiles use paths like `MaemoCompliance.Application/`, `MaemoCompliance.Infrastructure/` at repo root; actual paths are `application/src/MaemoCompliance.Application/`, `infrastructure/src/MaemoCompliance.Infrastructure/` — **Docker builds may fail** (see §6)
 
 ### External APIs / Integrations
 
@@ -102,11 +102,11 @@ Target users: Quality Managers, Compliance Officers, Consultants, System Adminis
 
 **Modular monolith** with Clean Architecture and CQRS:
 
-- **Domain** (`domain/src/Maemo.Domain`): Entities, enums, value objects
-- **Application** (`application/src/Maemo.Application`): Commands, queries, handlers, DTOs
-- **Infrastructure** (`infrastructure/src/Maemo.Infrastructure`): EF Core, file storage, Graph API
-- **API** (`Maemo.Api`): Host; Portal, Engine, Admin endpoints
-- **Workers** (`workers/src/Maemo.Workers`): Background jobs
+- **Domain** (`domain/src/MaemoCompliance.Domain`): Entities, enums, value objects
+- **Application** (`application/src/MaemoCompliance.Application`): Commands, queries, handlers, DTOs
+- **Infrastructure** (`infrastructure/src/MaemoCompliance.Infrastructure`): EF Core, file storage, Graph API
+- **API** (`MaemoCompliance.Api`): Host; Portal, Engine, Admin endpoints
+- **Workers** (`workers/src/MaemoCompliance.Workers`): Background jobs
 
 Data flow: **HTTP → Endpoint → MediatR → Handler → DbContext → PostgreSQL**
 
@@ -114,31 +114,31 @@ Data flow: **HTTP → Endpoint → MediatR → Handler → DbContext → Postgre
 
 ```
 maemo/
-├── Maemo.Api/                    # Canonical API host (Portal + Engine + Admin)
+├── MaemoCompliance.Api/                    # Canonical API host (Portal + Engine + Admin)
 │   ├── Portal/                   # /api/* (internal)
 │   ├── Engine/                   # /engine/v1/* (external, versioned)
 │   ├── Admin/                    # /admin/v1/* (platform admin)
 │   └── Middleware/               # Tenant, security, logging
 ├── application/src/
-│   ├── Maemo.Application/        # CQRS handlers, DTOs, validators
-│   └── Maemo.Shared/             # Shared contracts
-├── domain/src/Maemo.Domain/      # Domain entities
-├── infrastructure/src/Maemo.Infrastructure/
+│   ├── MaemoCompliance.Application/        # CQRS handlers, DTOs, validators
+│   └── MaemoCompliance.Shared/             # Shared contracts
+├── domain/src/MaemoCompliance.Domain/      # Domain entities
+├── infrastructure/src/MaemoCompliance.Infrastructure/
 │   ├── Persistence/              # EF Core, DbContext
 │   ├── Graph/                    # Microsoft Graph (stubbed)
 │   └── Demo/                     # DemoDataSeeder
-├── workers/src/Maemo.Workers/    # Background workers
+├── workers/src/MaemoCompliance.Workers/    # Background workers
 ├── frontend/                     # Angular Portal (port 4200)
 │   └── projects/admin-console/   # Admin Console (port 4300)
-├── Maemo.Engine.Client/           # C# SDK for Engine API
-├── Maemo.UnitTests/
-├── Maemo.IntegrationTests/
+├── MaemoCompliance.Engine.Client/           # C# SDK for Engine API
+├── MaemoCompliance.UnitTests/
+├── MaemoCompliance.IntegrationTests/
 └── engine/, portal/, admin/      # Legacy/alternate API projects (solution references)
 ```
 
 ### Data Flow
 
-1. **Entry:** HTTP request to `Maemo.Api` (Portal `/api/*`, Engine `/engine/v1/*`, Admin `/admin/v1/*`)
+1. **Entry:** HTTP request to `MaemoCompliance.Api` (Portal `/api/*`, Engine `/engine/v1/*`, Admin `/admin/v1/*`)
 2. **Middleware:** Tenant resolution, auth (JWT/API Key), logging
 3. **Endpoint:** Minimal API handler → `ISender.Send(command/query)`
 4. **Handler:** MediatR handler → `IApplicationDbContext` / repositories
@@ -192,8 +192,8 @@ maemo/
 
 ### Tests / Validation
 
-- **Unit tests:** `Maemo.UnitTests` — placeholder `UnitTest1` only
-- **Integration tests:** `Maemo.IntegrationTests` — `DocumentsApiTests`, `MaemoApiFixture`; minimal coverage
+- **Unit tests:** `MaemoCompliance.UnitTests` — placeholder `UnitTest1` only
+- **Integration tests:** `MaemoCompliance.IntegrationTests` — `DocumentsApiTests`, `MaemoComplianceApiFixture`; minimal coverage
 - **Validation:** FluentValidation on commands
 - **E2E:** None
 
@@ -218,21 +218,21 @@ maemo/
 
 | File | Issue |
 |------|-------|
-| `Maemo.Api/Portal/ConsultantsEndpoints.cs` L126 | Placeholder response for consultant clients |
+| `MaemoCompliance.Api/Portal/ConsultantsEndpoints.cs` L126 | Placeholder response for consultant clients |
 | `portal/.../DocumentsEndpoints.cs` L621 | TODO: tenant admin role check |
-| `Maemo.Application/.../GetDocumentAuditEvidenceQueryHandler.cs` L157 | TODO: Document-NCR links table |
-| `Maemo.Workers/.../RecordsRetentionWorker.cs` L175 | Placeholder worker logging |
-| `Maemo.Workers/.../DocumentDestructionWorker.cs` L225 | Placeholder worker logging |
-| `Maemo.Api/Admin/AdminBillingEndpoints.cs` | Billing endpoints placeholder (invoices, issue) |
+| `MaemoCompliance.Application/.../GetDocumentAuditEvidenceQueryHandler.cs` L157 | TODO: Document-NCR links table |
+| `MaemoCompliance.Workers/.../RecordsRetentionWorker.cs` L175 | Placeholder worker logging |
+| `MaemoCompliance.Workers/.../DocumentDestructionWorker.cs` L225 | Placeholder worker logging |
+| `MaemoCompliance.Api/Admin/AdminBillingEndpoints.cs` | Billing endpoints placeholder (invoices, issue) |
 | `portal/.../AuditLogEndpoints.cs` L36 | TODO: system admin check |
-| `Maemo.Api/Portal/AuditLogEndpoints.cs` L36 | Same |
+| `MaemoCompliance.Api/Portal/AuditLogEndpoints.cs` L36 | Same |
 | `UpdateTenantBrandingCommandHandler.cs` L39 | TODO: get ModifiedBy from user context |
 | `UpdateAdminTenantStatusCommandHandler.cs` L38 | TODO: TenantStatus enum |
 | `AdminTenantDetailDto.cs` L24 | TODO: AzureAdTenantId, SharePointSiteId |
 | `GetAdminDashboardSummaryQueryHandler.cs` L32 | TODO: TenantStatus enum |
 | `ProvisionTenantCommandHandler.cs` L186 | Placeholder admin user |
 | `GraphService.cs` L105, 122, 140, 155 | SharePoint upload TODO; Teams/Mail/GetUserProfile stubs |
-| `MaemoDbContextFactory.cs` L25 | Stub tenant provider for design-time |
+| `MaemoComplianceDbContextFactory.cs` L25 | Stub tenant provider for design-time |
 
 ### Missing Integrations / Broken Imports
 
@@ -260,7 +260,7 @@ maemo/
 
 ### Gaps Before Staging
 
-1. **Dockerfile paths:** API and Workers Dockerfiles reference `Maemo.Application/`, `Maemo.Domain/`, `Maemo.Infrastructure/`, `Maemo.Workers/` at repo root. Actual paths: `application/src/Maemo.Application/`, `domain/src/Maemo.Domain/`, `infrastructure/src/Maemo.Infrastructure/`, `workers/src/Maemo.Workers/`. **Docker builds will fail** unless paths are fixed.
+1. **Dockerfile paths:** API and Workers Dockerfiles reference `MaemoCompliance.Application/`, `MaemoCompliance.Domain/`, `MaemoCompliance.Infrastructure/`, `MaemoCompliance.Workers/` at repo root. Actual paths: `application/src/MaemoCompliance.Application/`, `domain/src/MaemoCompliance.Domain/`, `infrastructure/src/MaemoCompliance.Infrastructure/`, `workers/src/MaemoCompliance.Workers/`. **Docker builds will fail** unless paths are fixed.
 2. **Environment variables:** No `.env.example`; config scattered across `appsettings.*.json`, `environment.ts`
 3. **Azure AD:** Real tenant/client IDs required for production-like auth
 4. **Database migrations:** Strategy exists; ensure migrations run in staging (e.g. init container or startup)
@@ -288,7 +288,7 @@ maemo/
 
 ### Database Migration Strategy
 
-- EF Core migrations in `Maemo.Infrastructure/Migrations/`
+- EF Core migrations in `MaemoCompliance.Infrastructure/Migrations/`
 - Auto-apply in Development (see `Program.cs` or startup)
 - Staging/production: run `dotnet ef database update` or equivalent in init/startup
 
@@ -324,7 +324,7 @@ cd maemo
 
 ### Environment Variables
 
-- **API:** `Maemo.Api/appsettings.Development.json`
+- **API:** `MaemoCompliance.Api/appsettings.Development.json`
   - `ConnectionStrings:MaemoDatabase` — use port **5433** if using Docker DB (host port mapping)
   - `Authentication` — placeholders OK for dev; auth bypass in Development
 - **Frontend:** `frontend/src/environments/environment.ts`, `environment.development.ts`
@@ -343,7 +343,7 @@ docker compose up
 docker compose up db   # or local PostgreSQL on 5432/5433
 
 # Terminal 2: API
-cd Maemo.Api
+cd MaemoCompliance.Api
 dotnet run             # http://localhost:5000
 
 # Terminal 3: Portal
@@ -360,8 +360,8 @@ ng serve admin-console --port 4300   # http://localhost:4300
 
 ```powershell
 # Backend
-dotnet test Maemo.UnitTests/Maemo.UnitTests.csproj
-dotnet test Maemo.IntegrationTests/Maemo.IntegrationTests.csproj
+dotnet test MaemoCompliance.UnitTests/MaemoCompliance.UnitTests.csproj
+dotnet test MaemoCompliance.IntegrationTests/MaemoCompliance.IntegrationTests.csproj
 
 # Frontend
 cd frontend && ng test
@@ -448,13 +448,13 @@ cd frontend && ng test
 
 | Purpose | Path |
 |---------|------|
-| API host | `Maemo.Api/Program.cs` |
-| Portal routes | `Maemo.Api/Portal/*.cs` |
-| Engine routes | `Maemo.Api/Engine/**/*.cs` |
-| Admin routes | `Maemo.Api/Admin/*.cs` |
-| DbContext | `Maemo.Infrastructure/Persistence/` |
-| Migrations | `Maemo.Infrastructure/Migrations/` |
-| Demo seeder | `Maemo.Infrastructure/Demo/DemoDataSeeder.cs` |
+| API host | `MaemoCompliance.Api/Program.cs` |
+| Portal routes | `MaemoCompliance.Api/Portal/*.cs` |
+| Engine routes | `MaemoCompliance.Api/Engine/**/*.cs` |
+| Admin routes | `MaemoCompliance.Api/Admin/*.cs` |
+| DbContext | `MaemoCompliance.Infrastructure/Persistence/` |
+| Migrations | `MaemoCompliance.Infrastructure/Migrations/` |
+| Demo seeder | `MaemoCompliance.Infrastructure/Demo/DemoDataSeeder.cs` |
 | Frontend config | `frontend/src/environments/` |
 | Runbook | `RUNBOOK.md` |
 | Project analysis | `PROJECT_ANALYSIS.md` |

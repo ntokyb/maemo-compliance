@@ -24,7 +24,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Maemo.Api/Dockerfile
+      dockerfile: MaemoCompliance.Api/Dockerfile
     container_name: maemo-gov-api
     depends_on:
       db:
@@ -71,7 +71,7 @@ services:
   workers:
     build:
       context: .
-      dockerfile: workers/src/Maemo.Workers/Dockerfile
+      dockerfile: workers/src/MaemoCompliance.Workers/Dockerfile
     container_name: maemo-gov-workers
     depends_on:
       db:

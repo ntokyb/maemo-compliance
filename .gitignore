@@ -5,6 +5,7 @@
 **/bin/
 **/obj/
 **/dist/
+node_modules/
 
 # IDE / OS
 .idea/

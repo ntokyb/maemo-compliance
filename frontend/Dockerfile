@@ -22,7 +22,7 @@ WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 
 # Copy built Angular app from build stage
-COPY --from=build /app/dist/maemo-portal/browser .
+COPY --from=build /app/dist/maemo-compliance-portal/browser .
 
 # Copy nginx configuration (optional - for API proxy if needed)
 COPY nginx.conf /etc/nginx/conf.d/default.conf

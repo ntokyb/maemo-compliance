@@ -1,5 +1,5 @@
 # Integration tests (Testcontainers) typically run on the host:
-#   dotnet test Maemo.IntegrationTests/
+#   dotnet test MaemoCompliance.IntegrationTests/
 # with Docker Desktop running (PostgreSQL container per test run).
 #
 # This compose file is optional — use if you add a dedicated test DB service later.

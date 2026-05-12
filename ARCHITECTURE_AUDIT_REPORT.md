@@ -25,27 +25,27 @@ This audit examines the Maemo solution structure, identifying architectural patt
 ### Root Structure
 ```
 maemo/
-├── Maemo.Api/                    # ASP.NET Core Web API (monolithic)
-├── Maemo.Application/            # Application layer (CQRS + Engine facades)
-├── Maemo.Domain/                 # Domain entities and value objects
-├── Maemo.Infrastructure/         # Infrastructure implementations
-├── Maemo.Workers/                # Background worker services
-├── Maemo.UnitTests/              # Unit test project
-├── Maemo.IntegrationTests/       # Integration test project
-├── Maemo.Engine.Client/          # C# SDK client library
-├── Maemo.Engine.Sample/          # SDK sample application
+├── MaemoCompliance.Api/                    # ASP.NET Core Web API (monolithic)
+├── MaemoCompliance.Application/            # Application layer (CQRS + Engine facades)
+├── MaemoCompliance.Domain/                 # Domain entities and value objects
+├── MaemoCompliance.Infrastructure/         # Infrastructure implementations
+├── MaemoCompliance.Workers/                # Background worker services
+├── MaemoCompliance.UnitTests/              # Unit test project
+├── MaemoCompliance.IntegrationTests/       # Integration test project
+├── MaemoCompliance.Engine.Client/          # C# SDK client library
+├── MaemoCompliance.Engine.Sample/          # SDK sample application
 ├── frontend/                     # Angular application (monolithic)
 ├── deploy/                       # Deployment scripts
 ├── docker-compose.yml            # Docker Compose for development
 ├── docker-compose.govonprem.yml  # Docker Compose for GovOnPrem
-└── Maemo.sln                     # Solution file
+└── MaemoCompliance.sln                     # Solution file
 ```
 
 ### Detailed Backend Structure
 
-#### Maemo.Api/
+#### MaemoCompliance.Api/
 ```
-Maemo.Api/
+MaemoCompliance.Api/
 ├── Authentication/               # ApiKeyAuthenticationHandler
 ├── Endpoints/                    # Portal endpoints (/api/*)
 │   ├── AuditLogEndpoints.cs
@@ -75,9 +75,9 @@ Maemo.Api/
 - ⚠️ All endpoints mixed in same project
 - ⚠️ `ProgramClass.cs` appears unused/duplicate
 
-#### Maemo.Application/
+#### MaemoCompliance.Application/
 ```
-Maemo.Application/
+MaemoCompliance.Application/
 ├── AuditLog/                     # Audit logging feature
 ├── Audits/                       # Audit management feature
 │   ├── Commands/
@@ -121,9 +121,9 @@ Maemo.Application/
 - ⚠️ No clear distinction between Portal and Admin use cases
 - ✅ Good CQRS pattern with Commands/Queries separation
 
-#### Maemo.Domain/
+#### MaemoCompliance.Domain/
 ```
-Maemo.Domain/
+MaemoCompliance.Domain/
 ├── AuditLog/
 ├── Audits/
 ├── Common/                       # BaseEntity, TenantOwnedEntity, DeploymentMode
@@ -138,9 +138,9 @@ Maemo.Domain/
 
 **Status:** ✅ Well-structured, pure domain entities
 
-#### Maemo.Infrastructure/
+#### MaemoCompliance.Infrastructure/
 ```
-Maemo.Infrastructure/
+MaemoCompliance.Infrastructure/
 ├── AuditLog/                     # AuditLogger implementation
 ├── Billing/                      # PayFastBillingProvider
 ├── Common/                       # Infrastructure services
@@ -172,9 +172,9 @@ Maemo.Infrastructure/
 - ⚠️ `FileStorage/` vs `Storage/` - unclear separation
 - ⚠️ `DeploymentContext` in Infrastructure but used in Application layer interfaces
 
-#### Maemo.Workers/
+#### MaemoCompliance.Workers/
 ```
-Maemo.Workers/
+MaemoCompliance.Workers/
 ├── Services/
 │   ├── ComplianceJobsWorker.cs
 │   └── HeartbeatWorker.cs
@@ -242,7 +242,7 @@ docker-compose.govonprem.yml      # GovOnPrem stack
 ### 🔴 Critical Issues
 
 1. **No Admin Console Separation**
-   - All endpoints in single `Maemo.Api` project
+   - All endpoints in single `MaemoCompliance.Api` project
    - No `/admin/v1` route group
    - Admin functionality mixed with Portal endpoints
    - **Risk:** Cannot deploy Admin Console separately
@@ -299,7 +299,7 @@ docker-compose.govonprem.yml      # GovOnPrem stack
 ### 🟢 Low Priority Issues
 
 11. **Unused Files**
-    - `Maemo.Api/ProgramClass.cs` appears unused
+    - `MaemoCompliance.Api/ProgramClass.cs` appears unused
     - **Risk:** Confusion
 
 12. **No CI/CD Pipeline Files Visible**
@@ -319,7 +319,7 @@ docker-compose.govonprem.yml      # GovOnPrem stack
 ```
 maemo/
 ├── src/
-│   ├── Maemo.Api/                        # Main API Gateway
+│   ├── MaemoCompliance.Api/                        # Main API Gateway
 │   │   ├── Engine/                       # Engine API surface
 │   │   │   ├── Documents/
 │   │   │   ├── Ncrs/
@@ -343,7 +343,7 @@ maemo/
 │   │   │   └── HealthChecks/
 │   │   └── Program.cs
 │   │
-│   ├── Maemo.Application/               # Application layer
+│   ├── MaemoCompliance.Application/               # Application layer
 │   │   ├── Engine/                       # Engine facades (API-first)
 │   │   │   ├── Documents/
 │   │   │   ├── Ncrs/
@@ -364,15 +364,15 @@ maemo/
 │   │   │   └── Dtos/
 │   │   └── DependencyInjection.cs
 │   │
-│   ├── Maemo.Domain/                     # Domain layer (unchanged)
+│   ├── MaemoCompliance.Domain/                     # Domain layer (unchanged)
 │   │   ├── [Domain entities]
 │   │   └── Common/
 │   │
-│   ├── Maemo.Infrastructure/             # Infrastructure layer
+│   ├── MaemoCompliance.Infrastructure/             # Infrastructure layer
 │   │   ├── Persistence/                   # Database
 │   │   │   ├── Configurations/           # EF Core configs (consolidated)
 │   │   │   ├── Migrations/
-│   │   │   └── MaemoDbContext.cs
+│   │   │   └── MaemoComplianceDbContext.cs
 │   │   ├── Storage/                       # File storage (consolidated)
 │   │   │   ├── LocalFileStorageProvider.cs
 │   │   │   └── SharePointFileStorageProvider.cs
@@ -385,21 +385,21 @@ maemo/
 │   │   │   └── Billing/
 │   │   └── DependencyInjection.cs
 │   │
-│   ├── Maemo.Workers/                    # Background workers
+│   ├── MaemoCompliance.Workers/                    # Background workers
 │   │   ├── ComplianceJobs/
 │   │   │   └── ComplianceJobsWorker.cs
 │   │   ├── Heartbeat/
 │   │   │   └── HeartbeatWorker.cs
 │   │   └── Program.cs
 │   │
-│   ├── Maemo.Shared/                     # NEW: Shared library
+│   ├── MaemoCompliance.Shared/                     # NEW: Shared library
 │   │   ├── Dtos/                         # Shared DTOs
 │   │   ├── Contracts/                    # API contracts
 │   │   └── Constants/
 │   │
-│   └── Maemo.Engine.Client/              # SDK (references Shared)
+│   └── MaemoCompliance.Engine.Client/              # SDK (references Shared)
 │       ├── Clients/
-│       └── Models/                       # References Maemo.Shared.Dtos
+│       └── Models/                       # References MaemoCompliance.Shared.Dtos
 │
 ├── frontend/
 │   ├── portal/                           # NEW: Portal Angular app
@@ -439,8 +439,8 @@ maemo/
 │       └── angular.json
 │
 ├── tests/
-│   ├── Maemo.UnitTests/                  # Unit tests
-│   ├── Maemo.IntegrationTests/           # Integration tests
+│   ├── MaemoCompliance.UnitTests/                  # Unit tests
+│   ├── MaemoCompliance.IntegrationTests/           # Integration tests
 │   └── Maemo.E2ETests/                   # NEW: E2E tests
 │
 ├── deploy/
@@ -467,7 +467,7 @@ maemo/
 │
 ├── docker-compose.yml                    # Development stack
 ├── docker-compose.govonprem.yml          # GovOnPrem stack
-└── Maemo.sln
+└── MaemoCompliance.sln
 ```
 
 ### Key Architectural Principles
@@ -493,7 +493,7 @@ maemo/
    - External integrations grouped
 
 5. **Shared Library**
-   - `Maemo.Shared` for DTOs and contracts
+   - `MaemoCompliance.Shared` for DTOs and contracts
    - Used by Application, API, and SDK
    - Single source of truth
 
@@ -503,7 +503,7 @@ maemo/
 
 ### Phase 1: Foundation (Week 1-2)
 
-1. **Create Maemo.Shared Project**
+1. **Create MaemoCompliance.Shared Project**
    - Create new class library
    - Move common DTOs from Application
    - Update references
@@ -519,19 +519,19 @@ maemo/
    - Update references
 
 4. **Split Engine Endpoints**
-   - Create `Maemo.Api/Engine/Documents/`, `Ncrs/`, etc.
+   - Create `MaemoCompliance.Api/Engine/Documents/`, `Ncrs/`, etc.
    - Move endpoint methods to separate files
    - Update `EngineV1Endpoints.cs` to orchestrate
 
 ### Phase 2: API Separation (Week 3-4)
 
 5. **Create Portal Endpoints Structure**
-   - Create `Maemo.Api/Portal/` folder
+   - Create `MaemoCompliance.Api/Portal/` folder
    - Move existing `/api/*` endpoints
    - Organize by feature
 
 6. **Create Admin Endpoints Structure**
-   - Create `Maemo.Api/Admin/` folder
+   - Create `MaemoCompliance.Api/Admin/` folder
    - Identify admin endpoints (Tenants, Users, Billing)
    - Create `/admin/v1/*` route group
    - Implement admin endpoints
@@ -606,7 +606,7 @@ maemo/
    - **Effort:** Low (1-2 hours)
    - **Risk:** Low
 
-3. **Create Maemo.Shared Project**
+3. **Create MaemoCompliance.Shared Project**
    - **Impact:** High (enables SDK consistency)
    - **Effort:** Medium (4-6 hours)
    - **Risk:** Medium (requires updating references)
@@ -668,25 +668,25 @@ maemo/
 
 **Current Dependency Graph:**
 ```
-Maemo.Api
-  ├── Maemo.Application
-  │     └── Maemo.Domain
-  └── Maemo.Infrastructure
-        ├── Maemo.Application
-        └── Maemo.Domain
+MaemoCompliance.Api
+  ├── MaemoCompliance.Application
+  │     └── MaemoCompliance.Domain
+  └── MaemoCompliance.Infrastructure
+        ├── MaemoCompliance.Application
+        └── MaemoCompliance.Domain
 
-Maemo.Workers
-  ├── Maemo.Application
-  └── Maemo.Infrastructure
+MaemoCompliance.Workers
+  ├── MaemoCompliance.Application
+  └── MaemoCompliance.Infrastructure
 
-Maemo.Engine.Client
-  └── (standalone, references Maemo.Shared)
+MaemoCompliance.Engine.Client
+  └── (standalone, references MaemoCompliance.Shared)
 ```
 
 **Recommended:**
 - ✅ Keep current dependency flow (Domain ← Application ← Infrastructure ← Api)
-- ✅ Add Maemo.Shared as shared dependency
-- ✅ Engine.Client should reference Maemo.Shared, not Application
+- ✅ Add MaemoCompliance.Shared as shared dependency
+- ✅ Engine.Client should reference MaemoCompliance.Shared, not Application
 
 ### Testing Strategy
 
