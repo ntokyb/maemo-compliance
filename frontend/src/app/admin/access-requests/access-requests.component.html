@@ -23,9 +23,8 @@
           <th>Industry</th>
           <th>Contact</th>
           <th>Email</th>
-          <th>Standards</th>
-          <th>Created</th>
           <th>Status</th>
+          <th>Created</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -35,9 +34,8 @@
           <td>{{ r.industry }}</td>
           <td>{{ r.contactName }}</td>
           <td>{{ r.contactEmail }}</td>
-          <td class="narrow">{{ r.targetStandardsSummary }}</td>
-          <td>{{ r.createdAt | date: 'mediumDate' }}</td>
           <td><span class="badge">{{ r.status }}</span></td>
+          <td>{{ r.createdAt | date: 'mediumDate' }}</td>
           <td class="actions">
             <button type="button" class="linkbtn" *ngIf="r.status === 'Pending'" (click)="openApprove(r)">Approve</button>
             <button type="button" class="linkbtn danger" *ngIf="r.status === 'Pending'" (click)="openReject(r)">Reject</button>

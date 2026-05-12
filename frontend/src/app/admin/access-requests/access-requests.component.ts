@@ -2,8 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
-import { ToastService } from '../../../services/toast.service';
+import { environment } from '../../../environments/environment';
+import { ToastService } from '../../services/toast.service';
 
 interface AccessRequestRow {
   id: string;
@@ -17,13 +17,13 @@ interface AccessRequestRow {
 }
 
 @Component({
-  selector: 'app-access-requests-admin',
+  selector: 'app-access-requests',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './access-requests-admin.component.html',
-  styleUrl: './access-requests-admin.component.scss'
+  templateUrl: './access-requests.component.html',
+  styleUrl: './access-requests.component.scss'
 })
-export class AccessRequestsAdminComponent implements OnInit {
+export class AccessRequestsComponent implements OnInit {
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
@@ -60,9 +60,7 @@ export class AccessRequestsAdminComponent implements OnInit {
   load(): void {
     this.loading = true;
     const q =
-      this.filter === 'All'
-        ? ''
-        : `?status=${encodeURIComponent(this.filter)}`;
+      this.filter === 'All' ? '' : `?status=${encodeURIComponent(this.filter)}`;
     this.http.get<AccessRequestRow[]>(`${environment.apiBaseUrl}/admin/v1/access-requests${q}`).subscribe({
       next: (r) => {
         this.rows = r;

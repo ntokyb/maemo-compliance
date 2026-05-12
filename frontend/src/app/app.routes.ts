@@ -128,9 +128,7 @@ export const routes: Routes = [
           {
             path: 'access-requests',
             loadComponent: () =>
-              import('./features/admin/access-requests-admin/access-requests-admin.component').then(
-                m => m.AccessRequestsAdminComponent
-              ),
+              import('./admin/access-requests/access-requests.component').then(m => m.AccessRequestsComponent),
             canActivate: [platformAdminGuard]
           },
           {
