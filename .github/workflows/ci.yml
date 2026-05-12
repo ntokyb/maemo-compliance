@@ -203,10 +203,6 @@ jobs:
           host: ${{ secrets.MAEMO_COMPLIANCE_SSH_HOST }}
           username: ${{ secrets.MAEMO_COMPLIANCE_SSH_USER }}
           key: ${{ secrets.MAEMO_COMPLIANCE_SSH_KEY }}
-          port: 22
-          timeout: 60s
-          command_timeout: 15m
-          script_stop: true
           script: |
             set -e
             cd /opt/maemo-compliance/app
