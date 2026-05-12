@@ -1,5 +1,9 @@
 # maemo-compliance: .NET 8 backend (MaemoCompliance.sln) + Angular portal (frontend/).
 # Tests: MaemoCompliance.UnitTests / MaemoCompliance.IntegrationTests (Testcontainers; Docker on runner).
+#
+# Deploy: If you use GitHub Environment secrets, they OVERRIDE repository secrets for the same name.
+# Blank environment secrets → empty host/user/key and "missing server host". Either define real values
+# on Environment "production", or remove those environment secrets and rely on repository secrets only.
 
 name: CI
 
@@ -30,7 +34,6 @@ jobs:
       - name: Build solution
         run: dotnet build MaemoCompliance.sln -c Release
 
-      # Separate test projects (no xUnit Category=Unit/Integration traits).
       - name: Run unit tests
         run: dotnet test MaemoCompliance.UnitTests/MaemoCompliance.UnitTests.csproj -c Release --no-build
 
@@ -51,7 +54,6 @@ jobs:
       - name: Run integration tests
         run: dotnet test MaemoCompliance.IntegrationTests/MaemoCompliance.IntegrationTests.csproj -c Release --no-build
         env:
-          # GitHub-hosted runners: Docker is available for Testcontainers PostgreSQL.
           TESTCONTAINERS_RYUK_DISABLED: true
 
   frontend:
@@ -74,12 +76,6 @@ jobs:
 
       - name: Production build (Angular)
         run: npm run build
-
-      # Optional: billable Playwright against staging (uncomment when you have e2e/ + config).
-      # - run: npx playwright install --with-deps chromium
-      # - run: npx playwright test --project=billable
-      #   env:
-      #     BILLABLE_URL: ${{ secrets.MAEMO_COMPLIANCE_STAGING_URL }}
 
   playwright-smoke:
     name: Playwright smoke tests
@@ -115,15 +111,11 @@ jobs:
           name: playwright-report-maemo
           path: e2e/maemo-compliance/playwright-report/
 
-  # Canonical Dockerfiles: docker/Dockerfile.{api,portal,workers} (repo root context for all three).
   docker-build:
     name: Build and push Docker images
     needs: [unit, integration]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -141,7 +133,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: MaemoCompliance.Api/Dockerfile
+          file: docker/Dockerfile.api
           push: true
           tags: |
             ghcr.io/ntokyb/maemo-compliance-api:latest
@@ -178,9 +170,7 @@ jobs:
     needs: [unit, integration, docker-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: production
     steps:
-      # Fails fast with a clear message; “no supported methods remain” is usually missing/wrong key or wrong user.
       - name: Verify SSH secrets and private key format
         shell: bash
         env:
@@ -190,7 +180,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "${SSH_HOST}" ]]; then
-            echo "::error::MAEMO_COMPLIANCE_SSH_HOST is empty. Add it under Repo Settings → Secrets or Environment → production."
+            echo "::error::MAEMO_COMPLIANCE_SSH_HOST is empty. If using Environment 'production', remove blank env secrets (they override repo secrets)."
             exit 1
           fi
           if [[ -z "${SSH_USER}" ]]; then
@@ -198,14 +188,14 @@ jobs:
             exit 1
           fi
           if [[ -z "${SSH_KEY}" ]]; then
-            echo "::error::MAEMO_COMPLIANCE_SSH_KEY is empty."
+            echo "::error::MAEMO_COMPLIANCE_SSH_KEY is empty — use the server login key (BEGIN OPENSSH PRIVATE KEY), not the GitHub deploy key unless it is the same file."
             exit 1
           fi
           if ! printf '%s' "${SSH_KEY}" | grep -qE 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY'; then
-            echo "::error::MAEMO_COMPLIANCE_SSH_KEY must be the **private** key (full file including BEGIN/END lines). If pasting breaks newlines, store base64 and decode in a prior step."
+            echo "::error::MAEMO_COMPLIANCE_SSH_KEY must be a full private key (BEGIN/END lines, Unix newlines)."
             exit 1
           fi
-          echo "SSH preflight OK (host, user, and PEM/OpenSSH private key header present)."
+          echo "SSH preflight OK."
 
       - name: Deploy to Hetzner via SSH
         uses: appleboy/ssh-action@v1.2.4

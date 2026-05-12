@@ -19,12 +19,8 @@ $COMPOSE up -d --remove-orphans
 
 echo "Waiting for API health..."
 sleep 15
-if curl -f http://localhost:8090/health/live; then
-  echo "Health check passed"
-else
-  echo "HEALTH CHECK FAILED"
-  $COMPOSE logs --tail 30
-  exit 1
-fi
+curl -f http://localhost:8090/health/live \
+  && echo "Health check passed" \
+  || (echo "HEALTH CHECK FAILED" && $COMPOSE logs --tail 30 && exit 1)
 
 echo "=== Deploy complete ==="
