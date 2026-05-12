@@ -1,0 +1,152 @@
+<div class="risk-form-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Risk' : 'Create Risk' }}</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading risk...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <form [formGroup]="riskForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-section">
+      <h2>Basic Information</h2>
+      
+      <div class="form-group">
+        <label for="title">Title <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="title" 
+          formControlName="title"
+          class="form-control"
+          [class.invalid]="riskForm.get('title')?.invalid && riskForm.get('title')?.touched">
+        <div *ngIf="riskForm.get('title')?.invalid && riskForm.get('title')?.touched" class="error-message">
+          <div *ngIf="riskForm.get('title')?.errors?.['required']">Title is required</div>
+          <div *ngIf="riskForm.get('title')?.errors?.['maxlength']">Title must not exceed 200 characters</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description <span class="required">*</span></label>
+        <textarea 
+          id="description" 
+          formControlName="description"
+          rows="5"
+          class="form-control"
+          [class.invalid]="riskForm.get('description')?.invalid && riskForm.get('description')?.touched"></textarea>
+        <div *ngIf="riskForm.get('description')?.invalid && riskForm.get('description')?.touched" class="error-message">
+          <div *ngIf="riskForm.get('description')?.errors?.['required']">Description is required</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category <span class="required">*</span></label>
+          <select id="category" formControlName="category" class="form-control">
+            <option *ngFor="let option of categoryOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status <span class="required">*</span></label>
+          <select id="status" formControlName="status" class="form-control">
+            <option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cause">Cause</label>
+        <textarea 
+          id="cause" 
+          formControlName="cause"
+          rows="3"
+          class="form-control"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="consequences">Consequences</label>
+        <textarea 
+          id="consequences" 
+          formControlName="consequences"
+          rows="3"
+          class="form-control"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="ownerUserId">Owner User ID</label>
+        <input 
+          type="text" 
+          id="ownerUserId" 
+          formControlName="ownerUserId"
+          class="form-control">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Inherent Risk Assessment</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inherentLikelihood">Likelihood (1-5) <span class="required">*</span></label>
+          <select id="inherentLikelihood" formControlName="inherentLikelihood" class="form-control">
+            <option *ngFor="let val of likelihoodOptions" [value]="val">{{ val }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="inherentImpact">Impact (1-5) <span class="required">*</span></label>
+          <select id="inherentImpact" formControlName="inherentImpact" class="form-control">
+            <option *ngFor="let val of impactOptions" [value]="val">{{ val }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Existing Controls</h2>
+      
+      <div class="form-group">
+        <label for="existingControls">Existing Controls</label>
+        <textarea 
+          id="existingControls" 
+          formControlName="existingControls"
+          rows="4"
+          class="form-control"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Residual Risk Assessment</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="residualLikelihood">Likelihood (1-5) <span class="required">*</span></label>
+          <select id="residualLikelihood" formControlName="residualLikelihood" class="form-control">
+            <option *ngFor="let val of likelihoodOptions" [value]="val">{{ val }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="residualImpact">Impact (1-5) <span class="required">*</span></label>
+          <select id="residualImpact" formControlName="residualImpact" class="form-control">
+            <option *ngFor="let val of impactOptions" [value]="val">{{ val }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="saving">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving || riskForm.invalid">
+        {{ saving ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update' : 'Create') }}
+      </button>
+    </div>
+  </form>
+</div>
+

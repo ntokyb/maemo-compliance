@@ -1,0 +1,152 @@
+<div class="audit-run-container">
+  <div class="header">
+    <h1>Audit Run</h1>
+    <button *ngIf="!currentRun" (click)="showStartRun = true" class="btn-primary">Start New Audit</button>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+  </div>
+
+  <!-- Start Run Modal -->
+  <div *ngIf="showStartRun" class="modal-overlay" (click)="showStartRun = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Start New Audit Run</h2>
+      <form (ngSubmit)="startRun()">
+        <div class="form-group">
+          <label for="client-select">Select Client *</label>
+          <select 
+            id="client-select"
+            [(ngModel)]="selectedClientId" 
+            name="clientId"
+            required
+            class="form-input">
+            <option [value]="null">-- Select Client --</option>
+            <option *ngFor="let client of clients" [value]="client.tenantId">
+              {{ client.tenantName }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="template-select">Select Template *</label>
+          <select 
+            id="template-select"
+            [(ngModel)]="startRunRequest.auditTemplateId" 
+            name="templateId"
+            (change)="selectedTemplateId = startRunRequest.auditTemplateId"
+            required
+            class="form-input">
+            <option [value]="null">-- Select Template --</option>
+            <option *ngFor="let template of templates" [value]="template.id">
+              {{ template.name }}
+            </option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" (click)="showStartRun = false" class="btn-secondary">Cancel</button>
+          <button type="submit" [disabled]="saving" class="btn-primary">
+            {{ saving ? 'Starting...' : 'Start Audit' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Audit Run Content -->
+  <div *ngIf="currentRun" class="run-content">
+    <div class="run-header">
+      <h2>{{ currentRun.templateName || 'Audit Run' }}</h2>
+      <div class="run-info">
+        <span>Started: {{ currentRun.startedAt | date:'short' }}</span>
+        <span *ngIf="currentRun.completedAt">Completed: {{ currentRun.completedAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading">Loading audit questions...</div>
+
+    <div *ngIf="questions.length > 0" class="questions-list">
+      <div *ngFor="let question of questions" class="question-card">
+        <div class="question-header">
+          <h3>{{ question.category }}</h3>
+          <span class="max-score">Max Score: {{ question.maxScore }}</span>
+        </div>
+        <p class="question-text">{{ question.questionText }}</p>
+        
+        <div class="answer-section">
+          <div class="form-group">
+            <label>Score (0 - {{ question.maxScore }})</label>
+            <input 
+              type="number" 
+              [value]="getAnswerForQuestion(question.id)?.score ?? 0"
+              (input)="updateAnswerScore(question.id, +$any($event.target).value)"
+              min="0"
+              [max]="question.maxScore"
+              class="score-input"
+              [disabled]="isCompleted">
+          </div>
+
+          <div class="form-group">
+            <label>Comment</label>
+            <textarea 
+              [value]="getAnswerForQuestion(question.id)?.comment ?? ''"
+              (input)="updateAnswerComment(question.id, $any($event.target).value)"
+              rows="3"
+              class="comment-input"
+              placeholder="Add your comment..."
+              [disabled]="isCompleted"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Evidence</label>
+            <div class="evidence-section">
+              <input 
+                type="file" 
+                (change)="uploadEvidence(question.id, $event)"
+                class="file-input"
+                [disabled]="isCompleted">
+              <div *ngIf="getAnswerForQuestion(question.id)?.evidenceFileUrl" class="evidence-preview">
+                <a [href]="getAnswerForQuestion(question.id)?.evidenceFileUrl" target="_blank">
+                  View Evidence
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            (click)="submitAnswer(question)" 
+            class="btn-primary btn-sm"
+            [disabled]="isCompleted">
+            Save Answer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-completion" *ngIf="questions.length > 0">
+      <ng-container *ngIf="isCompleted; else completePrompt">
+        <div class="completion-banner">
+          Audit completed
+          <span *ngIf="currentRun?.completedAt"> on {{ currentRun?.completedAt | date:'mediumDate' }}</span>
+        </div>
+      </ng-container>
+      <ng-template #completePrompt>
+        <p class="completion-help">
+          Review all answers above before completing. Once completed, the audit cannot be edited.
+        </p>
+        <button
+          type="button"
+          (click)="completeAudit()"
+          [disabled]="isCompleting"
+          class="btn-primary btn-complete-audit">
+          {{ isCompleting ? 'Completing...' : 'Complete Audit' }}
+        </button>
+      </ng-template>
+    </div>
+  </div>
+
+  <div *ngIf="!currentRun && !showStartRun" class="empty-state">
+    <p>No active audit run. Start a new audit to begin.</p>
+    <button (click)="showStartRun = true" class="btn-primary">Start New Audit</button>
+  </div>
+</div>
+

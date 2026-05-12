@@ -1,0 +1,20 @@
+<div class="offline-banner" *ngIf="isOffline || pendingNcrCount > 0">
+  <div class="banner-content">
+    <div class="banner-icon">
+      <span *ngIf="isOffline">📴</span>
+      <span *ngIf="!isOffline && pendingNcrCount > 0">🔄</span>
+    </div>
+    <div class="banner-message">
+      <span *ngIf="isOffline" class="banner-title">Offline Mode</span>
+      <span *ngIf="!isOffline && pendingNcrCount > 0" class="banner-title">Pending Sync</span>
+      <span class="banner-description">
+        <span *ngIf="isOffline">You are currently offline. Changes will be saved locally.</span>
+        <span *ngIf="!isOffline && pendingNcrCount > 0">
+          {{ pendingNcrCount }} NCR{{ pendingNcrCount > 1 ? 's' : '' }} pending sync.
+          <button class="sync-button" (click)="syncNow()">Sync Now</button>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,102 @@
+<div class="workers-page">
+  <div class="page-header">
+    <h2>Workers</h2>
+    <p class="subtitle">Monitor background worker execution status and history</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading workers...</span>
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="!loading && !error" class="workers-content">
+    <div class="workers-table-container">
+      <table class="workers-table">
+        <thead>
+          <tr>
+            <th>Worker Name</th>
+            <th>Last Run</th>
+            <th>Status</th>
+            <th>Next Run</th>
+            <th>Last Error</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let worker of workers$ | async"
+            [class.selected]="selectedWorker === worker.name"
+            class="worker-row">
+            <td class="worker-name">{{ worker.name }}</td>
+            <td>{{ worker.lastRunAt ? (worker.lastRunAt | date:'short') : '-' }}</td>
+            <td>
+              <span [class]="getStatusClass(worker.lastStatus)">
+                {{ worker.lastStatus }}
+              </span>
+            </td>
+            <td>{{ worker.nextRunAt ? (worker.nextRunAt | date:'short') : '-' }}</td>
+            <td class="error-message">
+              <span *ngIf="worker.lastErrorMessage" class="error-text" [title]="worker.lastErrorMessage">
+                {{ worker.lastErrorMessage.length > 50 ? (worker.lastErrorMessage.substring(0, 50) + '...') : worker.lastErrorMessage }}
+              </span>
+              <span *ngIf="!worker.lastErrorMessage">-</span>
+            </td>
+            <td>
+              <button
+                (click)="selectWorker(worker.name)"
+                [class.active]="selectedWorker === worker.name"
+                class="btn-view-history">
+                {{ selectedWorker === worker.name ? 'Hide History' : 'View History' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="selectedWorker" class="worker-history">
+      <h3>Execution History: {{ selectedWorker }}</h3>
+      
+      <div *ngIf="loadingHistory" class="loading">
+        <div class="spinner"></div>
+        <span>Loading history...</span>
+      </div>
+
+      <div *ngIf="!loadingHistory" class="history-table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Status</th>
+              <th>Duration</th>
+              <th>Error Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of workerHistory$ | async" class="history-row">
+              <td>{{ item.timestamp | date:'medium' }}</td>
+              <td>
+                <span [class]="getStatusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td>{{ formatDuration(item.duration) }}</td>
+              <td class="error-message">
+                <span *ngIf="item.errorMessage" class="error-text" [title]="item.errorMessage">
+                  {{ item.errorMessage }}
+                </span>
+                <span *ngIf="!item.errorMessage">-</span>
+              </td>
+            </tr>
+            <tr *ngIf="(workerHistory$ | async)?.length === 0">
+              <td colspan="4" class="no-data">No execution history available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

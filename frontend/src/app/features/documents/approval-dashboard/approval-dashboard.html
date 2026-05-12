@@ -1,0 +1,70 @@
+<div class="approval-dashboard-container">
+  <div class="header">
+    <h1>Document Approval Dashboard</h1>
+    <button (click)="loadPendingApprovalDocuments()" [disabled]="loading" class="refresh-btn">
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading pending approvals...</span>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadPendingApprovalDocuments()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error" class="approval-content">
+    <div class="summary-card">
+      <div class="summary-value">{{ pendingDocuments.length }}</div>
+      <div class="summary-label">Documents Pending Approval</div>
+    </div>
+
+    <div *ngIf="pendingDocuments.length === 0" class="empty-state">
+      <p>No documents are currently pending approval.</p>
+      <button (click)="router.navigate(['/documents'])" class="btn btn-primary">
+        View All Documents
+      </button>
+    </div>
+
+    <div *ngIf="pendingDocuments.length > 0" class="documents-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Owner</th>
+            <th>Review Date</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of pendingDocuments">
+            <td>
+              <a (click)="navigateToDocument(doc.id!)" class="document-link">
+                {{ doc.title }}
+              </a>
+            </td>
+            <td>{{ doc.category || '-' }}</td>
+            <td>{{ doc.department || '-' }}</td>
+            <td>{{ doc.ownerUserId || '-' }}</td>
+            <td>{{ formatDate(doc.reviewDate) }}</td>
+            <td>-</td>
+            <td>
+              <button 
+                class="btn btn-sm btn-primary"
+                (click)="navigateToDocument(doc.id!)">
+                Review
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

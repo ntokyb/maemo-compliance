@@ -1,0 +1,162 @@
+<div class="tenant-settings-container">
+  <div class="header">
+    <h1>Tenant Settings</h1>
+  </div>
+
+  <nav class="tabs" *ngIf="!loading">
+    <button type="button" [class.active]="activeTab === 'general'" (click)="setTab('general')">General</button>
+    <button type="button" [class.active]="activeTab === 'sharepoint'" (click)="setTab('sharepoint')">Microsoft 365 / SharePoint</button>
+    <button type="button" [class.active]="activeTab === 'subscription'" (click)="setTab('subscription')">Subscription &amp; modules</button>
+    <button type="button" [class.active]="activeTab === 'users'" (click)="setTab('users')">Users</button>
+  </nav>
+
+  <div *ngIf="loading" class="loading">Loading tenant information...</div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="!loading && activeTab === 'general'" [formGroup]="generalForm" class="tab-panel">
+    <div class="form-group">
+      <label for="name">Company name <span class="required">*</span></label>
+      <input id="name" type="text" formControlName="name" class="form-control"
+        [class.invalid]="generalForm.get('name')?.invalid && generalForm.get('name')?.touched" />
+      <div *ngIf="generalForm.get('name')?.invalid && generalForm.get('name')?.touched" class="error-message">
+        <span *ngIf="generalForm.get('name')?.errors?.['required']">Name is required</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="logoUrl">Logo URL</label>
+      <input id="logoUrl" type="url" formControlName="logoUrl" class="form-control" placeholder="https://…" />
+      <div class="logo-preview" *ngIf="generalForm.get('logoUrl')?.value">
+        <img [src]="generalForm.get('logoUrl')?.value" alt="Logo preview" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="primaryColor">Primary colour (hex)</label>
+      <input id="primaryColor" type="text" formControlName="primaryColor" class="form-control" placeholder="#1976d2" />
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="savingGeneral">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveGeneral()" [disabled]="savingGeneral || generalForm.invalid">
+        {{ savingGeneral ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && activeTab === 'sharepoint'" [formGroup]="sharePointForm" class="tab-panel">
+    <div *ngIf="tenant?.sharePointSiteUrl" class="banner ok">
+      SharePoint configured — {{ tenant?.sharePointSiteUrl }}
+      <span *ngIf="tenant?.sharePointClientSecretConfigured"> · Client secret: ••••••</span>
+    </div>
+
+    <div class="form-group">
+      <label for="spUrl">SharePoint site URL</label>
+      <input id="spUrl" type="url" formControlName="sharePointSiteUrl" class="form-control"
+        placeholder="https://tenant.sharepoint.com/sites/YourSite" />
+    </div>
+    <div class="form-group">
+      <label for="spClientId">Client ID (app registration)</label>
+      <input id="spClientId" type="text" formControlName="sharePointClientId" class="form-control" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label for="spSecret">Client secret</label>
+      <input id="spSecret" type="password" formControlName="sharePointClientSecret" class="form-control"
+        [placeholder]="tenant?.sharePointClientSecretConfigured ? 'Leave blank to keep existing secret' : 'Required to save and test'" autocomplete="new-password" />
+    </div>
+    <div class="form-group">
+      <label for="spLib">Document library</label>
+      <input id="spLib" type="text" formControlName="sharePointLibraryName" class="form-control" />
+    </div>
+
+    <p *ngIf="sharePointTestMessage" [class.feedback-ok]="sharePointTestOk === true" [class.feedback-bad]="sharePointTestOk === false" class="feedback">
+      {{ sharePointTestOk === true ? '✅' : (sharePointTestOk === false ? '❌' : '') }} {{ sharePointTestMessage }}
+    </p>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="testSharePoint()" [disabled]="testingSharePoint || savingSharePoint">
+        {{ testingSharePoint ? 'Testing…' : 'Test connection' }}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveSharePoint()" [disabled]="savingSharePoint || testingSharePoint">
+        {{ savingSharePoint ? 'Saving…' : 'Save SharePoint config' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && activeTab === 'subscription'" class="tab-panel subscription-panel">
+    <p class="hint">Contact support to upgrade your plan.</p>
+    <dl class="read-only-grid">
+      <dt>Plan</dt>
+      <dd>{{ tenant?.plan || tenant?.edition || '—' }}</dd>
+      <dt>Expires</dt>
+      <dd>{{ tenant?.licenseExpiryDate ? (tenant?.licenseExpiryDate | date:'mediumDate') : 'No expiry' }}</dd>
+      <dt>Users</dt>
+      <dd>— / {{ tenant?.maxUsers ?? '—' }}</dd>
+      <dt>Storage</dt>
+      <dd>— / {{ maxStorageGb() }} GB</dd>
+    </dl>
+    <h3>Modules enabled</h3>
+    <ul class="module-list">
+      <li *ngFor="let m of moduleLabels">
+        <label>
+          <input type="checkbox" [checked]="moduleEnabled(m.key)" disabled />
+          {{ m.label }}
+        </label>
+      </li>
+      <li>
+        <label><input type="checkbox" disabled /> AI features (coming soon)</label>
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="!loading && activeTab === 'users'" class="tab-panel users-panel">
+    <div class="invite-block">
+      <h3>Invite user</h3>
+      <p class="hint">Invitees sign in with their Microsoft work account after accepting the link.</p>
+      <div *ngIf="inviteError" class="error invite-error">{{ inviteError }}</div>
+      <div class="invite-row">
+        <div class="form-group inline">
+          <label for="inviteEmail">Email address <span class="required">*</span></label>
+          <input id="inviteEmail" type="email" [(ngModel)]="inviteEmail" class="form-control"
+            placeholder="name@company.com" [ngModelOptions]="{standalone: true}" />
+        </div>
+        <div class="form-group inline narrow">
+          <label for="inviteRole">Role</label>
+          <select id="inviteRole" [(ngModel)]="inviteRole" class="form-control" [ngModelOptions]="{standalone: true}">
+            <option value="User">User</option>
+            <option value="TenantAdmin">Tenant admin</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-primary invite-send" (click)="sendInvite()" [disabled]="inviting">
+          {{ inviting ? 'Sending…' : 'Send invite' }}
+        </button>
+      </div>
+    </div>
+
+    <h3>People in this workspace</h3>
+    <div *ngIf="loadingUsers" class="loading">Loading users…</div>
+    <table *ngIf="!loadingUsers" class="user-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last login</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of directory">
+          <td>{{ row.email }}</td>
+          <td>{{ row.name || '—' }}</td>
+          <td>{{ row.role }}</td>
+          <td><span class="status-pill" [class.status-invited]="row.status === 'Invited'">{{ row.status }}</span></td>
+          <td>{{ row.lastLoginAt ? (row.lastLoginAt | date:'medium') : '—' }}</td>
+          <td class="actions">—</td>
+        </tr>
+        <tr *ngIf="directory.length === 0">
+          <td colspan="6" class="empty">No users yet. Send an invite above.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

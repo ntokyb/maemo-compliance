@@ -1,0 +1,93 @@
+<div class="documents-list-container">
+  <div class="header">
+    <h1>Documents</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="createFromTemplate()">Create from Template</button>
+      <button class="btn btn-primary" (click)="createNew()">Create Document</button>
+    </div>
+  </div>
+
+  <app-document-template-picker 
+    *ngIf="showTemplatePicker"
+    (templateSelected)="onTemplateSelected($event)"
+    (cancelled)="onTemplatePickerCancelled()">
+  </app-document-template-picker>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label for="categoryFilter">Category:</label>
+      <select id="categoryFilter" [(ngModel)]="selectedCategory" (change)="onCategoryFilterChange()" class="form-control">
+        <option *ngFor="let option of categoryOptions" [value]="option.value === null ? null : option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading documents...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+    <button (click)="loadDocuments()">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <table class="documents-table" *ngIf="documents.length > 0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Department</th>
+          <th>Review Date</th>
+          <th>Retain Until</th>
+          <th *ngIf="selectedCategory === 'BBBEE Certificate'">BBBEE Level</th>
+          <th *ngIf="selectedCategory === 'BBBEE Certificate'">Expiry Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let document of documents" [class.pending-archive]="document.isPendingArchive || isPastRetention(document.retainUntil)">
+          <td>
+            {{ document.title }}
+            <span *ngIf="document.isPendingArchive || isPastRetention(document.retainUntil)" class="retention-warning" title="Past retention period - requires archiving">
+              ⚠️
+            </span>
+          </td>
+          <td>{{ document.category || '-' }}</td>
+          <td>{{ document.department || '-' }}</td>
+          <td>{{ formatDate(document.reviewDate) }}</td>
+          <td>
+            <span *ngIf="document.retainUntil" [class]="getRetentionWarningClass(document.retainUntil)">
+              {{ formatDate(document.retainUntil) }}
+              <span *ngIf="document.isRetentionLocked" class="retention-locked-badge" title="Retention locked">🔒</span>
+            </span>
+            <span *ngIf="!document.retainUntil">-</span>
+          </td>
+          <td *ngIf="selectedCategory === 'BBBEE Certificate'">
+            <span *ngIf="document.bbbeeLevel">Level {{ document.bbbeeLevel }}</span>
+            <span *ngIf="!document.bbbeeLevel">-</span>
+          </td>
+          <td *ngIf="selectedCategory === 'BBBEE Certificate'">
+            <span *ngIf="document.bbbeeExpiryDate">{{ formatDate(document.bbbeeExpiryDate) }}</span>
+            <span *ngIf="!document.bbbeeExpiryDate">-</span>
+          </td>
+          <td>
+            <span class="status-badge workflow-badge" [ngClass]="getWorkflowStateClass(document.workflowState)">
+              {{ getWorkflowStateLabel(document.workflowState) }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary" (click)="editDocument(document.id!)">Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="documents.length === 0" class="empty-state">
+      <p>No documents found. Create your first document to get started.</p>
+      <button class="btn btn-primary" (click)="createNew()">Create Document</button>
+    </div>
+  </div>
+</div>
+

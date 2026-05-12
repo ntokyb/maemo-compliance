@@ -1,0 +1,37 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background: #f4f6f8;
+}
+
+.card {
+  max-width: 480px;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+  h1 {
+    margin-top: 0;
+  }
+}
+
+.btn.primary {
+  margin-top: 1rem;
+  padding: 0.55rem 1.2rem;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.err {
+  color: #b71c1c;
+}
+
+.link {
+  color: #1976d2;
+}

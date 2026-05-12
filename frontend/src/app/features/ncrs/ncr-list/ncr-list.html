@@ -1,0 +1,83 @@
+<div class="ncr-list-container">
+  <div class="header">
+    <h1>Non-Conformance Reports (NCRs)</h1>
+    <button class="btn btn-primary" (click)="createNew()">New NCR</button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label for="statusFilter">Status:</label>
+      <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let option of statusOptions" [value]="option.value === null ? null : option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="severityFilter">Severity:</label>
+      <select id="severityFilter" [(ngModel)]="selectedSeverity" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let option of severityOptions" [value]="option.value === null ? null : option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading NCRs...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+    <button (click)="loadNcrs()">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <table class="ncrs-table" *ngIf="ncrs.length > 0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Department</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Due Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ncr of ncrs" [class.overdue]="isOverdue(ncr)">
+          <td>{{ ncr.title }}</td>
+          <td>{{ ncr.department || '-' }}</td>
+          <td>
+            <span class="severity-badge" 
+                  [class.severity-low]="ncr.severity === NcrSeverity.Low"
+                  [class.severity-medium]="ncr.severity === NcrSeverity.Medium"
+                  [class.severity-high]="ncr.severity === NcrSeverity.High">
+              {{ getSeverityLabel(ncr.severity) }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" 
+                  [class.status-open]="ncr.status === NcrStatus.Open"
+                  [class.status-inprogress]="ncr.status === NcrStatus.InProgress"
+                  [class.status-closed]="ncr.status === NcrStatus.Closed">
+              {{ getStatusLabel(ncr.status) }}
+            </span>
+          </td>
+          <td [class.overdue-date]="isOverdue(ncr)">
+            {{ formatDate(ncr.dueDate) }}
+            <span *ngIf="isOverdue(ncr)" class="overdue-indicator">⚠ Overdue</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary" (click)="updateStatus(ncr.id!)">Update Status</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="ncrs.length === 0" class="empty-state">
+      <p>No NCRs found. Create your first NCR to get started.</p>
+      <button class="btn btn-primary" (click)="createNew()">New NCR</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,136 @@
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  justify-content: center;
+  color: #666;
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.tenants-list {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tenants-header {
+  margin-bottom: 2rem;
+}
+
+.tenants-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.loading, .error {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: #999;
+}
+
+.tenants-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tenants-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tenants-table thead {
+  background-color: #f8f9fa;
+}
+
+.tenants-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tenants-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tenant-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.status-active {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background-color: #27ae60;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-suspended {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background-color: #e74c3c;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.edition-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background-color: #3498db;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background-color: #9b59b6;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: #999;
+  font-style: italic;
+}
+

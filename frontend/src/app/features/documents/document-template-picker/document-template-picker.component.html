@@ -1,0 +1,48 @@
+<div class="template-picker-overlay" (click)="cancel()">
+  <div class="template-picker-dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h2>Create Document from Template</h2>
+      <button class="close-button" (click)="cancel()" aria-label="Close">×</button>
+    </div>
+
+    <div class="dialog-content">
+      <div class="filter-section">
+        <label for="standardFilter">Filter by Standard:</label>
+        <select 
+          id="standardFilter" 
+          [(ngModel)]="selectedStandard" 
+          (change)="onStandardFilterChange()"
+          class="form-control">
+          <option [value]="null">All Standards</option>
+          <option *ngFor="let standard of standards" [value]="standard">
+            {{ standard }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="loading" class="loading">Loading templates...</div>
+
+      <div *ngIf="!loading" class="templates-list">
+        <div 
+          *ngFor="let template of filteredTemplates" 
+          class="template-card"
+          (click)="selectTemplate(template)">
+          <div class="template-header">
+            <h3>{{ template.title }}</h3>
+            <span class="standard-badge">{{ template.standardCode }}</span>
+          </div>
+          <div class="template-id">{{ template.id }}</div>
+        </div>
+
+        <div *ngIf="filteredTemplates.length === 0" class="empty-state">
+          <p>No templates found.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
+  </div>
+</div>
+

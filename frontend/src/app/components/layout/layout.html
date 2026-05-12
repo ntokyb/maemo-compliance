@@ -1,0 +1,81 @@
+<div class="layout-container">
+  <!-- Offline Banner -->
+  <app-offline-banner></app-offline-banner>
+  
+  <nav class="navbar" [style.background-color]="primaryColor">
+    <div class="navbar-brand">
+      <img *ngIf="logoUrl" [src]="logoUrl" alt="Logo" class="navbar-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <h1 *ngIf="!logoUrl">Maemo</h1>
+      <span *ngIf="isDemoMode" class="demo-badge">DEMO MODE – {{ demoTenantName }}</span>
+    </div>
+    <div class="navbar-menu">
+      <!-- Consultant Client Switcher -->
+      <div *ngIf="isConsultant" class="client-switcher">
+        <label *ngIf="clients.length > 0" class="client-switcher-label">Client:</label>
+        <select 
+          [(ngModel)]="selectedClientId" 
+          (change)="onClientChange(selectedClientId!)"
+          [disabled]="loadingClients || clients.length === 0"
+          class="client-select">
+          <option [value]="null" disabled>
+            {{ loadingClients ? 'Loading clients...' : (clients.length === 0 ? 'No clients available' : 'Select Client') }}
+          </option>
+          <option *ngFor="let client of clients" [value]="client.tenantId">
+            {{ client.tenantName }}<span *ngIf="client.plan"> ({{ client.plan }})</span>
+          </option>
+        </select>
+        <span *ngIf="loadingClients" class="client-loading-spinner">⏳</span>
+      </div>
+      
+      <!-- Regular Tenant Info -->
+      <span *ngIf="currentTenantId && !isConsultant" class="tenant-info">
+        Tenant: {{ currentTenantId.substring(0, 8) }}...
+      </span>
+      <button *ngIf="currentTenantId && !isConsultant" (click)="changeTenant()" class="change-tenant-btn">
+        Change Tenant
+      </button>
+      
+      @if (activeAccount()) {
+        <span class="user-info">{{ displayName() }}</span>
+        <button type="button" (click)="logout()" class="logout-btn">Sign out</button>
+      } @else {
+        <button type="button" (click)="login()" class="logout-btn">Sign in</button>
+      }
+    </div>
+  </nav>
+
+  <div class="layout-content">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+        <a *ngIf="hasModule('Documents')" routerLink="/documents" routerLinkActive="active" class="nav-link">Documents</a>
+        <a *ngIf="hasModule('Documents')" routerLink="/documents/approvals" routerLinkActive="active" class="nav-link nav-link-indent">📋 Approvals</a>
+        <a *ngIf="hasModule('NCR')" routerLink="/ncrs" routerLinkActive="active" class="nav-link">NCRs</a>
+        <a *ngIf="hasModule('Risks')" routerLink="/risks" routerLinkActive="active" class="nav-link">Risks</a>
+        <a *ngIf="hasModule('Audits')" routerLink="/audits" routerLinkActive="active" class="nav-link">Audits</a>
+        
+        <div class="nav-section-divider"></div>
+        <div class="nav-section-header">Admin</div>
+        <a routerLink="/admin/tenant-settings" routerLinkActive="active" class="nav-link">Tenant Settings</a>
+        <a routerLink="/admin/m365-connection" routerLinkActive="active" class="nav-link">Microsoft 365 Integration</a>
+        <a routerLink="/admin/billing-info" routerLinkActive="active" class="nav-link">Billing</a>
+        
+        <div class="nav-section-divider"></div>
+        <div class="nav-section-header">Consultant</div>
+        <a routerLink="/consultant/dashboard" routerLinkActive="active" class="nav-link">Consultant Dashboard</a>
+        <a routerLink="/consultant/clients" routerLinkActive="active" class="nav-link">Clients</a>
+        <a routerLink="/consultant/branding" routerLinkActive="active" class="nav-link">Branding</a>
+        <a routerLink="/consultant/audit-templates" routerLinkActive="active" class="nav-link">Audit Templates</a>
+        <a routerLink="/consultant/audit-run" routerLinkActive="active" class="nav-link">Audit Run</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+<app-toast></app-toast>
+    </main>
+  </div>
+
+  <!-- Onboarding Wizard Modal -->
+  <app-onboarding-wizard *ngIf="showOnboardingWizard" (onComplete)="onOnboardingComplete()"></app-onboarding-wizard>
+</div>

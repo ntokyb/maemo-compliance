@@ -1,0 +1,119 @@
+<div class="onboarding-modal-overlay">
+  <div class="onboarding-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Welcome to Maemo!</h2>
+      <p>Let's get you started with a quick setup</p>
+    </div>
+
+    <div class="modal-body">
+      <!-- Progress Indicator -->
+      <div class="progress-indicator">
+        <div class="progress-steps">
+          <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+            <div class="step-number">1</div>
+            <div class="step-label">ISO Standards</div>
+          </div>
+          <div class="step-connector" [class.completed]="currentStep > 1"></div>
+          <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+            <div class="step-number">2</div>
+            <div class="step-label">Industry</div>
+          </div>
+          <div class="step-connector" [class.completed]="currentStep > 2"></div>
+          <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+            <div class="step-number">3</div>
+            <div class="step-label">Company Size</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step Content -->
+      <div class="step-content">
+        <h3>{{ getStepTitle() }}</h3>
+        <p class="step-description">{{ getStepDescription() }}</p>
+
+        <!-- Step 1: ISO Standards -->
+        <div *ngIf="currentStep === 1" class="step-1-content">
+          <div class="iso-standards-grid">
+            <div 
+              *ngFor="let standard of isoStandards" 
+              class="iso-standard-card"
+              [class.selected]="isIsoStandardSelected(standard)"
+              (click)="toggleIsoStandard(standard)">
+              <div class="checkbox">
+                <input 
+                  type="checkbox" 
+                  [checked]="isIsoStandardSelected(standard)"
+                  (change)="toggleIsoStandard(standard)">
+              </div>
+              <div class="standard-name">{{ standard }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Industry -->
+        <div *ngIf="currentStep === 2" class="step-2-content">
+          <div class="options-list">
+            <label 
+              *ngFor="let industry of industries" 
+              class="option-item"
+              [class.selected]="selectedIndustry === industry">
+              <input 
+                type="radio" 
+                name="industry" 
+                [value]="industry"
+                [(ngModel)]="selectedIndustry">
+              <span>{{ industry }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 3: Company Size -->
+        <div *ngIf="currentStep === 3" class="step-3-content">
+          <div class="options-list">
+            <label 
+              *ngFor="let size of companySizes" 
+              class="option-item"
+              [class.selected]="selectedCompanySize === size">
+              <input 
+                type="radio" 
+                name="companySize" 
+                [value]="size"
+                [(ngModel)]="selectedCompanySize">
+              <span>{{ size }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button 
+        *ngIf="currentStep > 1"
+        type="button" 
+        class="btn btn-secondary"
+        (click)="previousStep()"
+        [disabled]="loading">
+        Previous
+      </button>
+      <div class="spacer"></div>
+      <button 
+        *ngIf="currentStep < totalSteps"
+        type="button" 
+        class="btn btn-primary"
+        (click)="nextStep()"
+        [disabled]="!canProceedToNextStep() || loading">
+        Next
+      </button>
+      <button 
+        *ngIf="currentStep === totalSteps"
+        type="button" 
+        class="btn btn-primary"
+        (click)="completeOnboarding()"
+        [disabled]="!canProceedToNextStep() || loading">
+        <span *ngIf="loading">Completing...</span>
+        <span *ngIf="!loading">Complete Setup</span>
+      </button>
+    </div>
+  </div>
+</div>
+

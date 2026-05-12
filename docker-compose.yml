@@ -1,0 +1,79 @@
+# Local full stack — Postgres, API, workers, frontend (nginx).
+# Copy .env.example to .env and set AZURE_* values before `docker compose up`.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: maemo-postgres
+    environment:
+      POSTGRES_DB: maemo
+      POSTGRES_USER: maemo
+      POSTGRES_PASSWORD: maemo_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      # Distinct name avoids clashing with older compose volumes (different DB user/password)
+      - maemo_dev_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maemo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Maemo.Api/Dockerfile
+    container_name: maemo-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__MaemoDatabase: "Host=postgres;Port=5432;Database=maemo;Username=maemo;Password=maemo_dev_password"
+      Storage__ForceLocalFileStorage: "true"
+      Storage__LocalBasePath: /app/files
+      Authentication__Authority: ${AZURE_AUTHORITY:-https://login.microsoftonline.com/common/v2.0}
+      Authentication__Audience: ${AZURE_AUDIENCE:-api://maemo-api-placeholder}
+      Admin__DemoSeedApiKey: ${ADMIN__DEMO_SEED_API_KEY:-}
+    volumes:
+      - file_storage:/app/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  workers:
+    build:
+      context: .
+      dockerfile: workers/src/Maemo.Workers/Dockerfile
+    container_name: maemo-workers
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__MaemoDatabase: "Host=postgres;Port=5432;Database=maemo;Username=maemo;Password=maemo_dev_password"
+      Storage__ForceLocalFileStorage: "true"
+      Storage__LocalBasePath: /app/files
+    volumes:
+      - file_storage:/app/files
+    depends_on:
+      api:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: maemo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  maemo_dev_postgres_data:
+  file_storage:

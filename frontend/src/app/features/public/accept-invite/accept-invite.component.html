@@ -1,0 +1,35 @@
+<div class="wrap">
+  <div class="card">
+    <h1>Workspace invitation</h1>
+
+    <div *ngIf="loading">Validating invitation…</div>
+
+    <div *ngIf="!loading && preview && !preview.valid">
+      <p class="err">{{ preview.message || 'Invalid invitation.' }}</p>
+      <a routerLink="/login" class="link">Back to login</a>
+    </div>
+
+    <div *ngIf="!loading && preview?.valid && !done">
+      <p *ngIf="preview?.companyName">
+        You've been invited to <strong>{{ preview?.companyName }}</strong>
+      </p>
+      <p *ngIf="preview?.email">Email: {{ preview?.email }}</p>
+
+      <ng-container *ngIf="!auth.isAuthenticated(); else acceptBlock">
+        <p>Sign in with your Microsoft work account that matches this email.</p>
+        <button type="button" class="btn primary" (click)="login()">Sign in</button>
+      </ng-container>
+      <ng-template #acceptBlock>
+        <button type="button" class="btn primary" (click)="accept()" [disabled]="acceptLoading">
+          {{ acceptLoading ? 'Joining…' : 'Join workspace' }}
+        </button>
+        <p *ngIf="acceptError" class="err">{{ acceptError }}</p>
+      </ng-template>
+    </div>
+
+    <div *ngIf="done">
+      <p>You're now part of the workspace.</p>
+      <button type="button" class="btn primary" (click)="goDashboard()">Go to dashboard</button>
+    </div>
+  </div>
+</div>

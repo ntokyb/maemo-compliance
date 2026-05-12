@@ -1,0 +1,58 @@
+.offline-banner {
+  background-color: #fff3cd;
+  border-bottom: 2px solid #ffc107;
+  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .banner-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .banner-message {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+
+      .banner-title {
+        font-weight: 600;
+        color: #856404;
+      }
+
+      .banner-description {
+        color: #856404;
+        font-size: 14px;
+      }
+
+      .sync-button {
+        margin-left: 8px;
+        padding: 4px 12px;
+        background-color: #ffc107;
+        color: #856404;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #ffb300;
+        }
+      }
+    }
+  }
+}
+

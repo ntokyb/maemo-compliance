@@ -1,0 +1,88 @@
+<div class="m365-connection-container">
+  <div class="header">
+    <h1>Microsoft 365 Integration</h1>
+    <p class="subtitle">Connect your Microsoft 365 account to enable SharePoint file storage and Teams/Outlook notifications</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading connection information...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="success">
+    {{ success }}
+  </div>
+
+  <form [formGroup]="m365Form" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-group">
+      <label for="clientId">Azure AD Client ID <span class="required">*</span></label>
+      <input 
+        type="text" 
+        id="clientId" 
+        formControlName="clientId"
+        class="form-control"
+        placeholder="Enter your Azure AD Application Client ID"
+        [class.invalid]="m365Form.get('clientId')?.invalid && m365Form.get('clientId')?.touched">
+      <div *ngIf="m365Form.get('clientId')?.invalid && m365Form.get('clientId')?.touched" class="error-message">
+        <div *ngIf="m365Form.get('clientId')?.errors?.['required']">Client ID is required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="clientSecret">Azure AD Client Secret <span class="required">*</span></label>
+      <input 
+        type="password" 
+        id="clientSecret" 
+        formControlName="clientSecret"
+        class="form-control"
+        placeholder="Enter your Azure AD Application Client Secret"
+        [class.invalid]="m365Form.get('clientSecret')?.invalid && m365Form.get('clientSecret')?.touched">
+      <div *ngIf="m365Form.get('clientSecret')?.invalid && m365Form.get('clientSecret')?.touched" class="error-message">
+        <div *ngIf="m365Form.get('clientSecret')?.errors?.['required']">Client Secret is required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tenantId">Azure AD Tenant ID <span class="required">*</span></label>
+      <input 
+        type="text" 
+        id="tenantId" 
+        formControlName="tenantId"
+        class="form-control"
+        placeholder="Enter your Azure AD Tenant ID"
+        [class.invalid]="m365Form.get('tenantId')?.invalid && m365Form.get('tenantId')?.touched">
+      <div *ngIf="m365Form.get('tenantId')?.invalid && m365Form.get('tenantId')?.touched" class="error-message">
+        <div *ngIf="m365Form.get('tenantId')?.errors?.['required']">Tenant ID is required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="sharePointSiteId">SharePoint Site ID (Optional)</label>
+      <input 
+        type="text" 
+        id="sharePointSiteId" 
+        formControlName="sharePointSiteId"
+        class="form-control"
+        placeholder="Enter SharePoint Site ID">
+    </div>
+
+    <div class="form-group">
+      <label for="sharePointDriveId">SharePoint Drive ID (Optional)</label>
+      <input 
+        type="text" 
+        id="sharePointDriveId" 
+        formControlName="sharePointDriveId"
+        class="form-control"
+        placeholder="Enter SharePoint Drive ID">
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="connecting">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="connecting || m365Form.invalid">
+        {{ connecting ? 'Connecting...' : 'Connect' }}
+      </button>
+    </div>
+  </form>
+</div>
+

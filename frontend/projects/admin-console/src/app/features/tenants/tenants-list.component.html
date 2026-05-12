@@ -1,0 +1,51 @@
+<div class="tenants-list">
+  <div class="tenants-header">
+    <h2>Tenants</h2>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading tenants...</span>
+  </div>
+  <div *ngIf="error && !loading" class="error">{{ error }}</div>
+
+  <div *ngIf="tenants.length > 0 && !loading" class="tenants-table-container">
+    <table class="tenants-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Plan</th>
+          <th>Users (max)</th>
+          <th>Modules</th>
+          <th>SharePoint</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let tenant of tenants"
+          class="tenant-row">
+          <td><a [routerLink]="['/tenants', tenant.id]">{{ tenant.name }}</a></td>
+          <td>
+            <span *ngIf="tenant.plan" class="plan-badge">{{ tenant.plan }}</span>
+            <span *ngIf="!tenant.plan" class="text-muted">-</span>
+          </td>
+          <td>{{ tenant.maxUsers }}</td>
+          <td><span class="modules-cell">{{ tenant.modulesSummary }}</span></td>
+          <td>
+            <span *ngIf="tenant.sharePointConnected" class="sp-ok" title="Connected">✓</span>
+            <span *ngIf="!tenant.sharePointConnected" class="text-muted">—</span>
+          </td>
+          <td>{{ tenant.createdAt | date:'short' }}</td>
+          <td><a [routerLink]="['/tenants', tenant.id]" class="link-config">Configure</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="tenants.length === 0 && !loading && !error" class="empty-state">
+    No tenants found.
+  </div>
+</div>
+

@@ -1,0 +1,41 @@
+<div class="consultant-clients-container">
+  <div class="header">
+    <h1>My Clients</h1>
+    <button (click)="loadClients()" [disabled]="loading" class="refresh-btn">
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading clients...</div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadClients()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="clients.length === 0 && !loading && !error" class="empty-state">
+    <p>No clients found. Clients will appear here once they are assigned to you.</p>
+  </div>
+
+  <div *ngIf="clients.length > 0 && !loading" class="clients-grid">
+    <div *ngFor="let client of clients" class="client-card" [class.inactive]="!client.isActive">
+      <div class="client-header">
+        <h3>{{ client.tenantName }}</h3>
+        <span class="status-badge" [class.active]="client.isActive">
+          {{ client.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <div class="client-details">
+        <div class="detail">
+          <span class="label">Plan:</span>
+          <span class="value">{{ client.plan || 'N/A' }}</span>
+        </div>
+        <div class="detail">
+          <span class="label">Tenant ID:</span>
+          <span class="value">{{ client.tenantId }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

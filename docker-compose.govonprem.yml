@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: maemo-gov-db
+    environment:
+      POSTGRES_DB: maemo_gov
+      POSTGRES_USER: maemo_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-maemo_password_change_me}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_gov_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maemo_user -d maemo_gov"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - maemo-gov-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Maemo.Api/Dockerfile
+    container_name: maemo-gov-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # ASP.NET Core Environment
+      - ASPNETCORE_ENVIRONMENT=GovOnPrem
+      # Deployment Mode
+      - Deployment__Mode=GovOnPrem
+      # Database Connection
+      - ConnectionStrings__MaemoDatabase=Host=db;Port=5432;Database=maemo_gov;Username=maemo_user;Password=${DB_PASSWORD:-maemo_password_change_me}
+      # Storage Configuration
+      - Storage__LocalBasePath=/var/maemo/files
+      # Feature Flags
+      - Features__BillingEnabled=false
+      - Features__SelfServiceSignupEnabled=false
+      # Security (Encryption Key - MUST be changed in production)
+      - Security__EncryptionKey=${ENCRYPTION_KEY:-CHANGE_THIS_TO_A_32_BYTE_BASE64_KEY_IN_PRODUCTION}
+      # Authentication (configure for your identity provider)
+      - Authentication__Authority=${AUTH_AUTHORITY:-https://login.microsoftonline.com/{tenantId}/v2.0}
+      - Authentication__Audience=${AUTH_AUDIENCE:-api://maemo-api-client-id}
+      # Health Checks Security (optional)
+      - HealthChecks__ApiKey=${HEALTH_CHECK_API_KEY:-}
+      - HealthChecks__AllowedIPs=${HEALTH_CHECK_ALLOWED_IPS:-}
+      # Logging (logs are written to console and can be captured by Docker)
+      # For file logging, configure Serilog in appsettings.GovOnPrem.json
+    ports:
+      - "${API_PORT:-5000}:8080"
+    volumes:
+      # Local file storage
+      - maemo_local_files:/var/maemo/files
+      # Logs
+      - maemo_logs:/var/log/maemo
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/live || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - maemo-gov-network
+
+  workers:
+    build:
+      context: .
+      dockerfile: workers/src/Maemo.Workers/Dockerfile
+    container_name: maemo-gov-workers
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      # ASP.NET Core Environment
+      - ASPNETCORE_ENVIRONMENT=GovOnPrem
+      # Deployment Mode
+      - Deployment__Mode=GovOnPrem
+      # Database Connection
+      - ConnectionStrings__MaemoDatabase=Host=db;Port=5432;Database=maemo_gov;Username=maemo_user;Password=${DB_PASSWORD:-maemo_password_change_me}
+      # Storage Configuration
+      - Storage__LocalBasePath=/var/maemo/files
+      # Logging (optional - defaults to console if not configured)
+      # - Serilog__WriteTo__0__Args__path=/var/log/maemo/workers-.log
+      # - Serilog__WriteTo__0__Args__rollingInterval=Day
+    volumes:
+      # Local file storage (shared with API)
+      - maemo_local_files:/var/maemo/files
+      # Logs
+      - maemo_logs:/var/log/maemo
+    restart: unless-stopped
+    networks:
+      - maemo-gov-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # Note: Angular uses build-time environment variables
+      # For API proxying via nginx, copy nginx-govonprem.conf to nginx.conf before building
+      # Or set API_BASE_URL in environment.ts to match your deployment
+    container_name: maemo-gov-frontend
+    depends_on:
+      - api
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    restart: unless-stopped
+    networks:
+      - maemo-gov-network
+
+volumes:
+  postgres_gov_data:
+    driver: local
+  maemo_local_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOCAL_STORAGE_PATH:-./maemo_local_files}
+  maemo_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_PATH:-./logs}
+
+networks:
+  maemo-gov-network:
+    driver: bridge
+

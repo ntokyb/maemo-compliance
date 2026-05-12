@@ -1,0 +1,101 @@
+<div class="evidence-register-container">
+  <div class="header">
+    <h1>Evidence Register</h1>
+    <p class="subtitle">Central register of all evidence files with integrity verification (SHA256)</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label for="entityType">Entity Type</label>
+      <select id="entityType" [(ngModel)]="selectedEntityType" (change)="loadEvidence()" class="form-control">
+        <option *ngFor="let type of entityTypes" [value]="type.value">{{ type.label }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="fromDate">From Date</label>
+      <input type="date" id="fromDate" [(ngModel)]="fromDate" (change)="loadEvidence()" class="form-control">
+    </div>
+
+    <div class="filter-group">
+      <label for="toDate">To Date</label>
+      <input type="date" id="toDate" [(ngModel)]="toDate" (change)="loadEvidence()" class="form-control">
+    </div>
+
+    <div class="filter-group">
+      <label for="limit">Limit</label>
+      <input type="number" id="limit" [(ngModel)]="limit" (change)="loadEvidence()" class="form-control" min="1" max="1000">
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-primary" (click)="loadEvidence()">Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Loading evidence register...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadEvidence()">Retry</button>
+  </div>
+
+  <div *ngIf="evidenceItems.length === 0 && !loading" class="empty-state">
+    <p>No evidence items found.</p>
+  </div>
+
+  <div *ngIf="evidenceItems.length > 0 && !loading" class="evidence-table-container">
+    <table class="evidence-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Entity Type</th>
+          <th>Entity ID</th>
+          <th>File Name</th>
+          <th>File Hash (SHA256)</th>
+          <th>Uploaded By</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of evidenceItems">
+          <td>{{ formatDate(item.uploadedAt) }}</td>
+          <td>
+            <span class="entity-type-badge" [class.badge-document]="item.entityType === 'Document'"
+                  [class.badge-version]="item.entityType === 'DocumentVersion'"
+                  [class.badge-audit]="item.entityType === 'AuditAnswer'">
+              {{ getEntityTypeLabel(item.entityType) }}
+            </span>
+          </td>
+          <td>
+            <code class="entity-id">{{ item.entityId.substring(0, 8) }}...</code>
+          </td>
+          <td>{{ item.fileName }}</td>
+          <td>
+            <code class="file-hash" *ngIf="item.fileHash" (click)="copyHash(item.fileHash)" title="Click to copy">
+              {{ item.fileHash.substring(0, 16) }}...
+            </code>
+            <span *ngIf="!item.fileHash" class="no-hash">-</span>
+          </td>
+          <td>{{ item.uploadedBy || '-' }}</td>
+          <td>
+            <div class="details-cell">
+              <div *ngIf="item.documentTitle">
+                <strong>Document:</strong> {{ item.documentTitle }}
+              </div>
+              <div *ngIf="item.versionNumber">
+                <strong>Version:</strong> {{ item.versionNumber }}
+              </div>
+              <div *ngIf="item.auditRunId">
+                <strong>Audit Run:</strong> {{ item.auditRunId.substring(0, 8) }}...
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

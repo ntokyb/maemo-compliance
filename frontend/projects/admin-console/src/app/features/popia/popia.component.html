@@ -1,0 +1,147 @@
+<div class="popia-container">
+  <div class="header">
+    <h1>POPIA Compliance Report</h1>
+    <p class="subtitle">Personal Information Tracking and Access Reporting</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Loading POPIA summary...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadSummary()">Retry</button>
+  </div>
+
+  <div *ngIf="summary && !loading" class="summary-content">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-header">
+          <h3>Total Documents</h3>
+        </div>
+        <div class="card-body">
+          <div class="stat-value">{{ summary.totalDocuments }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>No Personal Info</h3>
+        </div>
+        <div class="card-body">
+          <div class="stat-value">{{ summary.documentsWithNoPersonalInfo }}</div>
+          <div class="stat-percentage">
+            {{ summary.totalDocuments > 0 ? (summary.documentsWithNoPersonalInfo / summary.totalDocuments * 100 | number:'1.0-1') : 0 }}%
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-warning">
+        <div class="card-header">
+          <h3>Contains Personal Info</h3>
+        </div>
+        <div class="card-body">
+          <div class="stat-value">{{ summary.documentsWithPersonalInfo }}</div>
+          <div class="stat-percentage">
+            {{ summary.totalDocuments > 0 ? (summary.documentsWithPersonalInfo / summary.totalDocuments * 100 | number:'1.0-1') : 0 }}%
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-danger">
+        <div class="card-header">
+          <h3>Contains Special Personal Info</h3>
+        </div>
+        <div class="card-body">
+          <div class="stat-value">{{ summary.documentsWithSpecialPersonalInfo }}</div>
+          <div class="stat-percentage">
+            {{ summary.totalDocuments > 0 ? (summary.documentsWithSpecialPersonalInfo / summary.totalDocuments * 100 | number:'1.0-1') : 0 }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- By Category -->
+    <div class="section" *ngIf="summary.byCategory.length > 0">
+      <h2>By Category</h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Total</th>
+              <th>No Personal Info</th>
+              <th>Personal Info</th>
+              <th>Special Personal Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of summary.byCategory">
+              <td>{{ item.category }}</td>
+              <td>{{ item.total }}</td>
+              <td>{{ item.withNoPersonalInfo }}</td>
+              <td class="warning-cell">{{ item.withPersonalInfo }}</td>
+              <td class="danger-cell">{{ item.withSpecialPersonalInfo }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- By Department -->
+    <div class="section" *ngIf="summary.byDepartment.length > 0">
+      <h2>By Department</h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Total</th>
+              <th>No Personal Info</th>
+              <th>Personal Info</th>
+              <th>Special Personal Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of summary.byDepartment">
+              <td>{{ item.department }}</td>
+              <td>{{ item.total }}</td>
+              <td>{{ item.withNoPersonalInfo }}</td>
+              <td class="warning-cell">{{ item.withPersonalInfo }}</td>
+              <td class="danger-cell">{{ item.withSpecialPersonalInfo }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- By Owner -->
+    <div class="section" *ngIf="summary.byOwner.length > 0">
+      <h2>By Owner</h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Owner</th>
+              <th>Total</th>
+              <th>No Personal Info</th>
+              <th>Personal Info</th>
+              <th>Special Personal Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of summary.byOwner">
+              <td>{{ item.ownerUserId }}</td>
+              <td>{{ item.total }}</td>
+              <td>{{ item.withNoPersonalInfo }}</td>
+              <td class="warning-cell">{{ item.withPersonalInfo }}</td>
+              <td class="danger-cell">{{ item.withSpecialPersonalInfo }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

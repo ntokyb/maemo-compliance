@@ -1,0 +1,81 @@
+<div class="records-retention-container">
+  <div class="header">
+    <h1>Records Retention (NARSA)</h1>
+    <div class="header-actions">
+      <button (click)="loadDocuments()" [disabled]="loading" class="btn btn-primary">
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+      <button (click)="exportToCsv()" [disabled]="documents.length === 0" class="btn btn-secondary">
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading documents past retention period...</span>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadDocuments()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div class="summary">
+      <p>
+        <strong>Documents past retention period:</strong> {{ documents.length }}
+        <span *ngIf="documents.length > 0">
+          | These documents have exceeded their retention period and should be archived per NARSA requirements.
+        </span>
+      </p>
+    </div>
+
+    <table class="retention-table" *ngIf="documents.length > 0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Department</th>
+          <th>Retention Date</th>
+          <th>Days Past</th>
+          <th>Status</th>
+          <th>PII Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let doc of documents" [class.pending-archive]="doc.isPendingArchive">
+          <td>{{ doc.title }}</td>
+          <td>{{ doc.category || '-' }}</td>
+          <td>{{ doc.department || '-' }}</td>
+          <td>{{ formatDate(doc.retainUntil) }}</td>
+          <td [class.urgent]="getDaysPastRetention(doc.retainUntil) > 30">
+            {{ getDaysPastRetention(doc.retainUntil) }}
+          </td>
+          <td>
+            <span class="status-badge" [class.pending]="doc.isPendingArchive">
+              {{ doc.isPendingArchive ? 'Pending Archive' : doc.status }}
+            </span>
+          </td>
+          <td>{{ doc.piiType !== undefined ? getPiiTypeLabel(doc.piiType) : 'None' }}</td>
+          <td>
+            <a [routerLink]="['/documents', doc.id]" class="btn-link">View</a>
+            <button 
+              (click)="archiveDocument(doc)" 
+              [disabled]="archivingDocumentId === doc.id"
+              class="btn btn-small btn-primary">
+              {{ archivingDocumentId === doc.id ? 'Archiving...' : 'Archive Now' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="documents.length === 0 && !loading" class="empty-state">
+      <p>No documents past retention period found.</p>
+      <p class="help-text">Documents are automatically marked for archiving when they exceed their retention period.</p>
+    </div>
+  </div>
+</div>
+

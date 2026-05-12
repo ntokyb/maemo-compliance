@@ -1,0 +1,82 @@
+<div class="consultant-dashboard-container">
+  <div class="header">
+    <h1>Consultant Dashboard</h1>
+    <div class="header-actions">
+      <select 
+        *ngIf="clients.length > 0" 
+        [(ngModel)]="selectedClientId" 
+        (change)="onClientChange(selectedClientId!)"
+        class="client-selector">
+        <option [value]="null">All Clients</option>
+        <option *ngFor="let client of clients" [value]="client.tenantId">
+          {{ client.tenantName }} ({{ client.plan || 'N/A' }})
+        </option>
+      </select>
+      <button (click)="loadSummary()" [disabled]="loading" class="refresh-btn">
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading dashboard summary...</div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadSummary()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="summary && !loading" class="summary-cards">
+    <div class="card">
+      <div class="card-header">
+        <h2>Clients</h2>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.totalClients }}</div>
+          <div class="stat-label">Total Active Clients</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Non-Conformance Reports</h2>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.totalOpenNcrs }}</div>
+          <div class="stat-label">Open NCRs</div>
+        </div>
+        <div class="stat stat-warning">
+          <div class="stat-value">{{ summary.totalHighSeverityNcrs }}</div>
+          <div class="stat-label">High Severity</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Risks</h2>
+      </div>
+      <div class="card-content">
+        <div class="stat stat-warning">
+          <div class="stat-value">{{ summary.totalHighRisks }}</div>
+          <div class="stat-label">High Risks</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Document Reviews</h2>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.upcomingDocumentReviews }}</div>
+          <div class="stat-label">Upcoming Reviews (14 days)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

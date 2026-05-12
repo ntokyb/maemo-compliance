@@ -1,0 +1,79 @@
+<div class="risk-list-container">
+  <div class="header">
+    <h1>Risk Register</h1>
+    <button class="btn btn-primary" (click)="createNew()">New Risk</button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label for="categoryFilter">Category:</label>
+      <select id="categoryFilter" [(ngModel)]="selectedCategory" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let option of categoryOptions" [value]="option.value === null ? null : option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="statusFilter">Status:</label>
+      <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let option of statusOptions" [value]="option.value === null ? null : option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading risks...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+    <button (click)="loadRisks()">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <table class="risks-table" *ngIf="risks.length > 0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Residual Score</th>
+          <th>Risk Level</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let risk of risks">
+          <td>{{ risk.title }}</td>
+          <td>{{ getCategoryLabel(risk.category) }}</td>
+          <td>{{ risk.residualScore }}</td>
+          <td>
+            <span class="risk-level-badge" [ngClass]="getRiskLevelClass(risk.riskLevel)">
+              {{ risk.riskLevel || 'N/A' }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" 
+                  [class.status-identified]="risk.status === RiskStatus.Identified"
+                  [class.status-analysed]="risk.status === RiskStatus.Analysed"
+                  [class.status-mitigated]="risk.status === RiskStatus.Mitigated"
+                  [class.status-accepted]="risk.status === RiskStatus.Accepted"
+                  [class.status-closed]="risk.status === RiskStatus.Closed">
+              {{ getStatusLabel(risk.status) }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary" (click)="editRisk(risk.id!)">Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="risks.length === 0" class="empty-state">
+      <p>No risks found. Create your first risk to get started.</p>
+      <button class="btn btn-primary" (click)="createNew()">New Risk</button>
+    </div>
+  </div>
+</div>
+

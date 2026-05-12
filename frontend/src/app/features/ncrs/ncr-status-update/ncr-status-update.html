@@ -1,0 +1,82 @@
+<div class="ncr-status-update-container">
+  <div class="header">
+    <h1>Update NCR Status</h1>
+    <p class="ncr-title">{{ ncrTitle }}</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading NCR...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <form [formGroup]="statusForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="form-group">
+      <label for="status">Status <span class="required">*</span></label>
+      <select id="status" formControlName="status" class="form-control">
+        <option *ngFor="let option of statusOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="dueDate">Due Date</label>
+      <input 
+        type="date" 
+        id="dueDate" 
+        formControlName="dueDate"
+        class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="closedAt">Closed Date</label>
+      <input 
+        type="date" 
+        id="closedAt" 
+        formControlName="closedAt"
+        class="form-control">
+      <small class="help-text">Set this when closing the NCR</small>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="saving">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving || statusForm.invalid">
+        {{ saving ? 'Updating...' : 'Update Status' }}
+      </button>
+    </div>
+  </form>
+
+  <section class="linked-risks" *ngIf="!loading && ncrId">
+    <h2>Linked risks</h2>
+    <p *ngIf="loadingRisks" class="loading">Loading risks…</p>
+    <p *ngIf="!loadingRisks && linkedRisks.length === 0">No risks linked to this NCR.</p>
+    <ul *ngIf="!loadingRisks && linkedRisks.length > 0" class="linked-risk-list">
+      <li *ngFor="let risk of linkedRisks" class="risk-item">
+        <span class="risk-title">{{ risk.title }}</span>
+        <span class="badge">Score: {{ risk.residualScore }}</span>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="unlinkRisk(risk.id!)" [disabled]="linkingRisk">Unlink</button>
+      </li>
+    </ul>
+    <div class="form-group link-risk-form">
+      <label for="linkRiskSelect">Link a risk</label>
+      <select
+        id="linkRiskSelect"
+        class="form-control"
+        [(ngModel)]="selectedRiskIdForLink"
+        name="selectedRiskIdForLink"
+        [disabled]="linkingRisk || availableRisks.length === 0">
+        <option value="">Select a risk to link…</option>
+        <option *ngFor="let risk of availableRisks" [value]="risk.id">
+          {{ risk.title }} (Score: {{ risk.residualScore }})
+        </option>
+      </select>
+      <div class="form-actions" style="margin-top: 0.5rem;">
+        <button type="button" class="btn btn-primary" (click)="linkRisk()" [disabled]="linkingRisk || !selectedRiskIdForLink">
+          {{ linkingRisk ? 'Working…' : 'Link risk' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+

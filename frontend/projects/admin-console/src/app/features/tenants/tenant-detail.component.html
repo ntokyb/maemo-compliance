@@ -1,0 +1,298 @@
+<div class="tenant-detail">
+  <div class="tenant-detail-header">
+    <button (click)="goBack()" class="back-button">← Back to Tenants</button>
+    <h2>Tenant Detail</h2>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading tenant details...</span>
+  </div>
+  <div *ngIf="error && !loading" class="error">{{ error }}</div>
+
+  <nav class="admin-tabs" *ngIf="tenant && !loading">
+    <button type="button" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Overview</button>
+    <button type="button" [class.active]="activeTab === 'branding'" (click)="setTab('branding')">Branding</button>
+    <button type="button" [class.active]="activeTab === 'sharepoint'" (click)="setTab('sharepoint')">SharePoint</button>
+    <button type="button" [class.active]="activeTab === 'license'" (click)="setTab('license')">License</button>
+    <button type="button" [class.active]="activeTab === 'audit'" (click)="setTab('audit')">Audit log</button>
+  </nav>
+
+  <div *ngIf="tenant && !loading" class="tenant-detail-content">
+    <div *ngIf="activeTab === 'overview'" class="tenant-info-card">
+      <div class="card-section">
+        <h3>Basic Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Name</label>
+            <div class="info-value">{{ tenant.name }}</div>
+          </div>
+          <div class="info-item">
+            <label>Edition</label>
+            <div class="info-value">
+              <span class="edition-badge">{{ tenant.edition || 'Not set' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>Plan</label>
+            <div class="info-value">
+              <span class="plan-badge">{{ tenant.plan || 'Not set' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>Domain</label>
+            <div class="info-value">{{ tenant.domain || '-' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Admin Email</label>
+            <div class="info-value">{{ tenant.adminEmail }}</div>
+          </div>
+          <div class="info-item">
+            <label>Subscription ID</label>
+            <div class="info-value">{{ tenant.subscriptionId || '-' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Status</label>
+            <div class="info-value">
+              <span [class]="tenant.isActive ? 'status-active' : 'status-suspended'">
+                {{ tenant.isActive ? 'Active' : 'Suspended' }}
+              </span>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>Max users / storage</label>
+            <div class="info-value">{{ tenant.maxUsers }} users · {{ (tenant.maxStorageBytes / 1073741824) | number:'1.1-1' }} GB</div>
+          </div>
+          <div class="info-item full-width">
+            <label>SharePoint</label>
+            <div class="info-value">
+              <span *ngIf="tenant.sharePointSiteUrl">{{ tenant.sharePointSiteUrl }}</span>
+              <span *ngIf="!tenant.sharePointSiteUrl" class="text-muted">Not configured</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <h3>Licensing</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>License Expiry</label>
+            <div class="info-value">
+              <span *ngIf="tenant.licenseExpiryDate" [class]="getLicenseStatus().class" class="license-badge">
+                {{ getLicenseStatus().text }} ({{ tenant.licenseExpiryDate | date:'short' }})
+              </span>
+              <span *ngIf="!tenant.licenseExpiryDate" class="license-badge license-no-expiry">No expiry</span>
+            </div>
+          </div>
+          <div class="info-item full-width">
+            <label>Enabled Modules</label>
+            <div class="info-value">
+              <div *ngIf="tenant.modulesEnabled?.length" class="modules-list">
+                <span *ngFor="let module of tenant.modulesEnabled" class="module-chip">{{ module }}</span>
+              </div>
+              <span *ngIf="!tenant.modulesEnabled?.length" class="text-muted">No modules enabled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <h3>Timeline</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Created At</label>
+            <div class="info-value">{{ tenant.createdAt | date:'medium' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Created By</label>
+            <div class="info-value">{{ tenant.createdBy || '-' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Modified At</label>
+            <div class="info-value">{{ tenant.modifiedAt ? (tenant.modifiedAt | date:'medium') : '-' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Modified By</label>
+            <div class="info-value">{{ tenant.modifiedBy || '-' }}</div>
+          </div>
+          <div class="info-item">
+            <label>Trial Ends At</label>
+            <div class="info-value">{{ tenant.trialEndsAt ? (tenant.trialEndsAt | date:'medium') : '-' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <h3>Statistics</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Documents</label>
+            <div class="info-value">{{ tenant.documentCount }}</div>
+          </div>
+          <div class="info-item">
+            <label>NCRs</label>
+            <div class="info-value">{{ tenant.ncrCount }}</div>
+          </div>
+          <div class="info-item">
+            <label>Risks</label>
+            <div class="info-value">{{ tenant.riskCount }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <h3>Actions</h3>
+        <div class="action-buttons">
+          <button
+            *ngIf="tenant.isActive"
+            (click)="updateStatus('Suspended')"
+            [disabled]="updatingStatus"
+            class="btn btn-danger">
+            Suspend Tenant
+          </button>
+          <button
+            *ngIf="!tenant.isActive"
+            (click)="updateStatus('Active')"
+            [disabled]="updatingStatus"
+            class="btn btn-success">
+            Activate Tenant
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'branding'" class="tenant-info-card">
+      <div class="card-section">
+        <h3>Branding</h3>
+        <div class="branding-section">
+          <div class="branding-preview">
+            <div class="preview-item">
+              <label>Logo Preview</label>
+              <div class="logo-preview">
+                <img *ngIf="logoUrl" [src]="logoUrl" alt="Tenant Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span *ngIf="!logoUrl" class="logo-placeholder">No logo set</span>
+              </div>
+            </div>
+            <div class="preview-item">
+              <label>Primary Color Preview</label>
+              <div class="color-preview">
+                <div class="color-box" [style.background-color]="primaryColor || '#1976d2'"></div>
+                <span class="color-value">{{ primaryColor || 'Default (#1976d2)' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="branding-form">
+            <div class="form-group">
+              <label for="logoUrl">Logo URL</label>
+              <input type="text" id="logoUrl" [(ngModel)]="logoUrl" placeholder="https://example.com/logo.png" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="primaryColor">Primary Color (Hex)</label>
+              <input type="text" id="primaryColor" [(ngModel)]="primaryColor" placeholder="#1976d2" class="form-input">
+            </div>
+            <button (click)="updateBranding()" [disabled]="updatingBranding" class="btn btn-primary">
+              {{ updatingBranding ? 'Saving...' : 'Save Branding' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'sharepoint'" class="tenant-info-card">
+      <div class="card-section">
+        <h3>Microsoft 365 / SharePoint</h3>
+        <p class="text-muted" *ngIf="tenant.azureAdTenantId">Azure AD tenant ID: {{ tenant.azureAdTenantId }}</p>
+        <div *ngIf="tenant.sharePointSiteUrl" class="banner-ok">
+          Configured — {{ tenant.sharePointSiteUrl }}
+          <span *ngIf="tenant.sharePointClientSecretConfigured"> · Secret stored</span>
+        </div>
+        <div class="form-group">
+          <label>Site URL</label>
+          <input type="url" class="form-input" [(ngModel)]="spSiteUrl" />
+        </div>
+        <div class="form-group">
+          <label>App client ID</label>
+          <input type="text" class="form-input" [(ngModel)]="spClientId" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Client secret</label>
+          <input type="password" class="form-input" [(ngModel)]="spSecret" [placeholder]="tenant.sharePointClientSecretConfigured ? 'Leave blank to keep' : ''" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label>Document library</label>
+          <input type="text" class="form-input" [(ngModel)]="spLibrary" />
+        </div>
+        <p *ngIf="spTestMsg" [class.text-ok]="spTestOk === true" [class.text-bad]="spTestOk === false">{{ spTestMsg }}</p>
+        <div class="action-buttons">
+          <button type="button" class="btn btn-secondary" (click)="testSharePoint()" [disabled]="testingSp || savingSp">{{ testingSp ? 'Testing…' : 'Test connection' }}</button>
+          <button type="button" class="btn btn-primary" (click)="saveSharePoint()" [disabled]="savingSp || testingSp">{{ savingSp ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'license'" class="tenant-info-card">
+      <div class="card-section">
+        <h3>License &amp; modules</h3>
+        <div class="form-group">
+          <label>Plan</label>
+          <select class="form-input" [(ngModel)]="licPlan">
+            <option value="Starter">Starter</option>
+            <option value="Professional">Professional</option>
+            <option value="Enterprise">Enterprise</option>
+            <option value="GovOnPrem">GovOnPrem</option>
+            <option value="Pilot">Pilot (legacy)</option>
+            <option value="Standard">Standard (legacy)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Max users</label>
+          <input type="number" class="form-input" [(ngModel)]="licMaxUsers" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Max storage (GB)</label>
+          <input type="number" class="form-input" [(ngModel)]="licMaxStorageGb" step="0.1" min="0.1" />
+        </div>
+        <div class="form-group">
+          <label>Expiry (optional)</label>
+          <input type="date" class="form-input" [(ngModel)]="licExpiry" />
+        </div>
+        <div class="form-group">
+          <label>Modules</label>
+          <div><label><input type="checkbox" [(ngModel)]="licDocuments" /> Documents</label></div>
+          <div><label><input type="checkbox" [(ngModel)]="licNcr" /> NCR</label></div>
+          <div><label><input type="checkbox" [(ngModel)]="licRisks" /> Risks</label></div>
+          <div><label><input type="checkbox" [(ngModel)]="licAudits" /> Audits</label></div>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="saveLicense()" [disabled]="savingLic">{{ savingLic ? 'Saving…' : 'Save license' }}</button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'audit'" class="tenant-info-card">
+      <div class="card-section">
+        <h3>Business audit log</h3>
+        <p class="text-muted">Showing recent entries for this tenant (same data as Logs → filter by tenant).</p>
+        <div *ngIf="loadingAudit" class="loading">Loading…</div>
+        <table *ngIf="!loadingAudit && auditLogs.length" class="audit-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Entity</th>
+              <th>User</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of auditLogs">
+              <td>{{ log.timestamp | date:'short' }}</td>
+              <td>{{ log.action }}</td>
+              <td>{{ log.entityType }} / {{ log.entityId }}</td>
+              <td>{{ log.username || log.userId || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!loadingAudit && !auditLogs.length" class="text-muted">No log entries.</p>
+      </div>
+    </div>
+  </div>
+</div>

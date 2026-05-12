@@ -1,0 +1,271 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h1>Dashboard</h1>
+    <button (click)="loadSummary()" [disabled]="loading" class="refresh-btn">
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading dashboard summary...</span>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadSummary()" class="retry-btn">Retry</button>
+  </div>
+
+  <section *ngIf="onboarding && !onboarding.dismissed" class="onboarding-card">
+    <div class="onboarding-header">
+      <h2>Get set up — {{ onboarding.completedCount }} / {{ onboarding.totalCount }} complete</h2>
+      <button type="button" class="btn-text" (click)="dismissOnboarding()" [disabled]="dismissingOnboarding">
+        Hide this checklist
+      </button>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="(onboarding.completedCount / onboarding.totalCount) * 100"></div>
+    </div>
+    <p *ngIf="onboarding.allComplete" class="celebrate">Setup complete! Your compliance programme is live.</p>
+    <ul class="checklist">
+      <li *ngFor="let s of onboarding.steps" [class.done]="s.complete">
+        <span class="icon">{{ s.complete ? '✅' : '⬜' }}</span>
+        <span class="label">{{ s.label }}</span>
+        <button *ngIf="!s.complete" type="button" class="btn-text" (click)="openOnboardingLink(s.link)">Start →</button>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Demo Flow Shortcuts -->
+  <div *ngIf="summary && !loading" class="demo-shortcuts">
+    <h2>Quick Actions</h2>
+    <div class="shortcut-cards">
+      <div class="shortcut-card" (click)="router.navigate(['/documents'])" *ngIf="hasModule('Documents')">
+        <div class="shortcut-icon">📄</div>
+        <div class="shortcut-title">View Controlled Documents</div>
+        <div class="shortcut-description">Browse ISO 9001 and SHEQ documents</div>
+      </div>
+      <div class="shortcut-card" (click)="router.navigate(['/ncrs/new'])" *ngIf="hasModule('NCR')">
+        <div class="shortcut-icon">⚠️</div>
+        <div class="shortcut-title">Log a Non-Conformance (NCR)</div>
+        <div class="shortcut-description">Report quality or safety issues</div>
+      </div>
+      <div class="shortcut-card" (click)="router.navigate(['/risks'])" *ngIf="hasModule('Risks')">
+        <div class="shortcut-icon">📊</div>
+        <div class="shortcut-title">View Risk Register</div>
+        <div class="shortcut-description">Review and manage risks</div>
+      </div>
+      <div class="shortcut-card" (click)="navigateToAuditRun()" *ngIf="hasModule('Audits')">
+        <div class="shortcut-icon">✅</div>
+        <div class="shortcut-title">View Latest Audit Run</div>
+        <div class="shortcut-description" *ngIf="loadingAuditRun">Loading...</div>
+        <div class="shortcut-description" *ngIf="!loadingAuditRun">Review audit results</div>
+      </div>
+      <div class="shortcut-card" (click)="navigateToDocumentApproval()" *ngIf="hasModule('Documents')">
+        <div class="shortcut-icon">📋</div>
+        <div class="shortcut-title">Document Approvals</div>
+        <div class="shortcut-description" *ngIf="loadingPendingApproval">Loading...</div>
+        <div class="shortcut-description" *ngIf="!loadingPendingApproval">
+          {{ pendingApprovalDocuments.length }} pending approval
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="summary && !loading" class="summary-cards">
+    <div class="card">
+      <div class="card-header">
+        <h2>Documents</h2>
+        <a routerLink="/documents" class="card-link">View All</a>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.totalDocuments }}</div>
+          <div class="stat-label">Total Documents</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ summary.activeDocuments }}</div>
+          <div class="stat-label">Active Documents</div>
+        </div>
+        <div class="stat" [class.stat-warning]="pendingApprovalDocuments.length > 0" *ngIf="hasModule('Documents')">
+          <div class="stat-value">{{ pendingApprovalDocuments.length }}</div>
+          <div class="stat-label">Pending Approval</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Approval Documents Widget -->
+    <div class="card" *ngIf="hasModule('Documents') && pendingApprovalDocuments.length > 0">
+      <div class="card-header">
+        <h2>Pending Approval</h2>
+        <a (click)="navigateToDocumentApproval()" class="card-link" style="cursor: pointer;">View All</a>
+      </div>
+      <div class="card-content">
+        <div *ngIf="loadingPendingApproval" class="loading">Loading...</div>
+        <div *ngIf="!loadingPendingApproval" class="pending-approval-list">
+          <div 
+            *ngFor="let doc of pendingApprovalDocuments.slice(0, 5)" 
+            class="pending-item"
+            (click)="router.navigate(['/documents', doc.id])"
+            style="cursor: pointer;">
+            <div class="pending-item-title">{{ doc.title }}</div>
+            <div class="pending-item-meta">
+              <span *ngIf="doc.department">{{ doc.department }}</span>
+              <span *ngIf="doc.category"> • {{ doc.category }}</span>
+            </div>
+          </div>
+          <div *ngIf="pendingApprovalDocuments.length > 5" class="pending-item-more">
+            + {{ pendingApprovalDocuments.length - 5 }} more
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BBBEE Certificate Expiring Soon Widget -->
+    <div class="card" *ngIf="hasModule('Documents') && bbbeeCertificatesExpiring.length > 0">
+      <div class="card-header">
+        <h2>BBBEE Certificates Expiring Soon</h2>
+        <a (click)="navigateToBbbeeCertificates()" class="card-link" style="cursor: pointer;">View All</a>
+      </div>
+      <div class="card-content">
+        <div *ngIf="loadingBbbeeCertificates" class="loading">Loading...</div>
+        <div *ngIf="!loadingBbbeeCertificates" class="bbbee-certificates-list">
+          <div 
+            *ngFor="let cert of bbbeeCertificatesExpiring.slice(0, 5)" 
+            class="bbbee-item"
+            (click)="router.navigate(['/documents', cert.id])"
+            style="cursor: pointer;">
+            <div class="bbbee-item-header">
+              <div class="bbbee-item-title">{{ cert.title }}</div>
+              <div class="bbbee-level" *ngIf="cert.bbbeeLevel">Level {{ cert.bbbeeLevel }}</div>
+            </div>
+            <div class="bbbee-item-meta">
+              <span *ngIf="cert.bbbeeExpiryDate">
+                Expires: {{ formatDate(cert.bbbeeExpiryDate) }}
+                <span class="days-remaining" [class.urgent]="getDaysUntilExpiry(cert.bbbeeExpiryDate) <= 30">
+                  ({{ getDaysUntilExpiry(cert.bbbeeExpiryDate) }} days)
+                </span>
+              </span>
+            </div>
+          </div>
+          <div *ngIf="bbbeeCertificatesExpiring.length > 5" class="bbbee-item-more">
+            + {{ bbbeeCertificatesExpiring.length - 5 }} more
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPIA Personal Info Documents Widget -->
+    <div class="card" *ngIf="hasModule('Documents') && popiaPersonalInfoDocuments.length > 0">
+      <div class="card-header">
+        <h2>POPIA Personal Info Documents</h2>
+        <a (click)="navigateToPopiaReport()" class="card-link" style="cursor: pointer;">View Report</a>
+      </div>
+      <div class="card-content">
+        <div *ngIf="loadingPopiaDocuments" class="loading">Loading...</div>
+        <div *ngIf="!loadingPopiaDocuments">
+          <div class="stat">
+            <div class="stat-value">{{ popiaPersonalInfoDocuments.length }}</div>
+            <div class="stat-label">Documents with Personal Information</div>
+          </div>
+          <div class="popia-list">
+            <div 
+              *ngFor="let doc of popiaPersonalInfoDocuments.slice(0, 5)" 
+              class="popia-item"
+              (click)="router.navigate(['/documents', doc.id])"
+              style="cursor: pointer;">
+              <div class="popia-item-title">{{ doc.title }}</div>
+              <div class="popia-item-meta">
+                <span *ngIf="doc.piiType !== undefined">Type: {{ getPiiTypeLabel(doc.piiType) }}</span>
+                <span *ngIf="doc.department"> • {{ doc.department }}</span>
+              </div>
+            </div>
+            <div *ngIf="popiaPersonalInfoDocuments.length > 5" class="popia-item-more">
+              + {{ popiaPersonalInfoDocuments.length - 5 }} more
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents Near Retention Expiry Widget -->
+    <div class="card" *ngIf="hasModule('Documents') && documentsNearRetentionExpiry.length > 0">
+      <div class="card-header">
+        <h2>Documents Near Retention Expiry</h2>
+        <a (click)="navigateToPopiaReport()" class="card-link" style="cursor: pointer;">View Report</a>
+      </div>
+      <div class="card-content">
+        <div *ngIf="loadingRetentionExpiry" class="loading">Loading...</div>
+        <div *ngIf="!loadingRetentionExpiry" class="retention-expiry-list">
+          <div 
+            *ngFor="let doc of documentsNearRetentionExpiry.slice(0, 5)" 
+            class="retention-item"
+            (click)="router.navigate(['/documents', doc.id])"
+            style="cursor: pointer;">
+            <div class="retention-item-header">
+              <div class="retention-item-title">{{ doc.title }}</div>
+              <div class="retention-days" [class.urgent]="doc.retainUntil && getDaysUntilExpiry(doc.retainUntil) <= 30">
+                <span *ngIf="doc.retainUntil">
+                  {{ getDaysUntilExpiry(doc.retainUntil) }} days
+                </span>
+              </div>
+            </div>
+            <div class="retention-item-meta">
+              <span *ngIf="doc.piiType !== undefined">PII Type: {{ getPiiTypeLabel(doc.piiType) }}</span>
+              <span *ngIf="doc.retainUntil"> • Expires: {{ formatDate(doc.retainUntil) }}</span>
+            </div>
+          </div>
+          <div *ngIf="documentsNearRetentionExpiry.length > 5" class="retention-item-more">
+            + {{ documentsNearRetentionExpiry.length - 5 }} more
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Non-Conformance Reports</h2>
+        <a routerLink="/ncrs" class="card-link">View All</a>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.totalNcrs }}</div>
+          <div class="stat-label">Total NCRs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ summary.openNcrs }}</div>
+          <div class="stat-label">Open NCRs</div>
+        </div>
+        <div class="stat" [class.stat-warning]="summary.overdueNcrs > 0">
+          <div class="stat-value">{{ summary.overdueNcrs }}</div>
+          <div class="stat-label">Overdue NCRs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Risks</h2>
+        <a routerLink="/risks" class="card-link">View All</a>
+      </div>
+      <div class="card-content">
+        <div class="stat">
+          <div class="stat-value">{{ summary.totalRisks }}</div>
+          <div class="stat-label">Total Risks</div>
+        </div>
+        <div class="stat" [class.stat-warning]="summary.highRisks > 0">
+          <div class="stat-value">{{ summary.highRisks }}</div>
+          <div class="stat-label">High Risks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ summary.mediumRisks }}</div>
+          <div class="stat-label">Medium Risks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ summary.lowRisks }}</div>
+          <div class="stat-label">Low Risks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

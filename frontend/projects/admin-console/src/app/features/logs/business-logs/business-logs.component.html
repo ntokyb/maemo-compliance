@@ -1,0 +1,137 @@
+<div class="business-logs-container">
+  <div class="header">
+    <h1>Business Audit Logs</h1>
+    <p class="subtitle">Compliance traceability for key business events</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-panel">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="tenantFilter">Tenant</label>
+        <select 
+          id="tenantFilter" 
+          [(ngModel)]="selectedTenantId"
+          class="form-control">
+          <option value="">All Tenants</option>
+          <option *ngFor="let tenant of tenants" [value]="tenant.id">
+            {{ tenant.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="actionFilter">Action</label>
+        <select 
+          id="actionFilter" 
+          [(ngModel)]="selectedAction"
+          class="form-control">
+          <option value="">All Actions</option>
+          <option *ngFor="let action of availableActions" [value]="action">
+            {{ action }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="entityTypeFilter">Entity Type</label>
+        <select 
+          id="entityTypeFilter" 
+          [(ngModel)]="selectedEntityType"
+          class="form-control">
+          <option value="">All Types</option>
+          <option *ngFor="let type of availableEntityTypes" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="limitFilter">Limit</label>
+        <select 
+          id="limitFilter" 
+          [(ngModel)]="limit"
+          class="form-control">
+          <option [value]="50">50</option>
+          <option [value]="100">100</option>
+          <option [value]="500">500</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" (click)="applyFilters()" [disabled]="loading">
+          Apply Filters
+        </button>
+        <button class="btn btn-secondary" (click)="clearFilters()" [disabled]="loading">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <p>Loading business logs...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadLogs()">Retry</button>
+  </div>
+
+  <!-- Logs Table -->
+  <div *ngIf="!loading && !error" class="logs-table-container">
+    <table class="logs-table" *ngIf="logs.length > 0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Action</th>
+          <th>Entity Type</th>
+          <th>Entity ID</th>
+          <th>Tenant</th>
+          <th>Username</th>
+          <th>Metadata</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td class="timestamp">
+            {{ log.timestamp | date:'short' }}
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getActionBadgeClass(log.action)">
+              {{ log.action }}
+            </span>
+          </td>
+          <td>
+            <span class="entity-type">{{ log.entityType }}</span>
+          </td>
+          <td class="entity-id">
+            <code>{{ log.entityId }}</code>
+          </td>
+          <td>{{ getTenantName(log.tenantId) }}</td>
+          <td>{{ log.username || log.userId || '-' }}</td>
+          <td class="metadata-cell">
+            <button 
+              *ngIf="log.metadataJson"
+              class="btn-link"
+              (click)="toggleMetadata(log.id)">
+              {{ isMetadataExpanded(log.id) ? 'Hide' : 'Show' }} Metadata
+            </button>
+            <span *ngIf="!log.metadataJson" class="text-muted">-</span>
+            
+            <div *ngIf="isMetadataExpanded(log.id) && log.metadataJson" class="metadata-content">
+              <pre>{{ formatMetadata(log.metadataJson) | json }}</pre>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="logs.length === 0" class="empty-state">
+      <p>No business logs found matching the selected filters.</p>
+    </div>
+  </div>
+</div>
+

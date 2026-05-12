@@ -1,0 +1,74 @@
+<div class="tenant-selector-container">
+  <div class="tenant-selector-card">
+    <div class="header">
+      <h1>Select Tenant</h1>
+      <p class="subtitle">Please select the tenant you want to access</p>
+    </div>
+
+    <!-- Demo Mode Banner -->
+    <div class="demo-banner">
+      <div class="demo-banner-content">
+        <div class="demo-banner-text">
+          <strong>Demo Mode:</strong> Quick access to demo data
+        </div>
+        <button 
+          (click)="switchToDemo()" 
+          [disabled]="demoLoading"
+          class="demo-btn">
+          <span *ngIf="!demoLoading">Switch to Demo Manufacturing Co.</span>
+          <span *ngIf="demoLoading">Loading...</span>
+        </button>
+      </div>
+      <div *ngIf="demoError" class="demo-error">{{ demoError }}</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div *ngIf="loading" class="loading">Loading tenants...</div>
+
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error" class="selector-content">
+      <div class="form-group" *ngIf="tenants.length > 0">
+        <label for="tenantSelect">Select Tenant</label>
+        <select 
+          id="tenantSelect" 
+          class="form-control"
+          [value]="selectedTenantId || ''"
+          (change)="onTenantChange($event)">
+          <option value="">-- Select a tenant --</option>
+          <option *ngFor="let tenant of tenants" [value]="tenant.id">
+            {{ tenant.name }} ({{ tenant.plan || 'No plan' }})
+          </option>
+        </select>
+        <small class="form-text text-muted">
+          Select your tenant from the list above, or enter the tenant ID manually below.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="tenantIdInput">Or enter Tenant ID manually</label>
+        <input 
+          type="text" 
+          id="tenantIdInput" 
+          class="form-control"
+          [value]="selectedTenantId || ''"
+          (input)="onTenantIdInput($event)"
+          placeholder="Enter tenant ID (GUID)">
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="selectTenant()"
+          [disabled]="!selectedTenantId">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

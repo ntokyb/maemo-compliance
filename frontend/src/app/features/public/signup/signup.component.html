@@ -1,0 +1,91 @@
+<div class="signup-wrap">
+  <div class="signup-card" *ngIf="!successEmail">
+    <h1>Create your Maemo workspace</h1>
+    <p class="muted">Step {{ step }} of 3</p>
+
+    <div *ngIf="error" class="alert error">{{ error }}</div>
+
+    <div *ngIf="step === 1" [formGroup]="companyForm">
+      <label>Company name <span class="req">*</span></label>
+      <input type="text" formControlName="companyName" class="ctrl" />
+      <div class="field-error" *ngIf="companyForm.get('companyName')?.invalid && companyForm.get('companyName')?.touched">
+        Required
+      </div>
+
+      <label>Industry</label>
+      <select formControlName="industry" class="ctrl">
+        <option *ngFor="let i of industries" [value]="i">{{ i }}</option>
+      </select>
+
+      <fieldset class="iso">
+        <legend>ISO frameworks</legend>
+        <label class="chk"><input type="checkbox" formControlName="iso9001" /> ISO 9001</label>
+        <label class="chk"><input type="checkbox" formControlName="iso14001" /> ISO 14001</label>
+        <label class="chk"><input type="checkbox" formControlName="iso27001" /> ISO 27001</label>
+        <label class="chk"><input type="checkbox" formControlName="iso45001" /> ISO 45001</label>
+        <label class="chk"><input type="checkbox" formControlName="iso31000" /> ISO 31000</label>
+      </fieldset>
+
+      <label>Plan</label>
+      <label class="radio"><input type="radio" formControlName="plan" value="Starter" /> Starter (free trial)</label>
+      <label class="radio"><input type="radio" formControlName="plan" value="Professional" /> Professional</label>
+      <label class="radio"><input type="radio" formControlName="plan" value="GovOnPrem" /> Gov / On-prem — contact us</label>
+
+      <div class="actions">
+        <a routerLink="/login" class="link">Back to login</a>
+        <button type="button" class="btn primary" (click)="nextFromCompany()">Continue</button>
+      </div>
+    </div>
+
+    <form [formGroup]="adminForm" *ngIf="step === 2">
+      <label>First name <span class="req">*</span></label>
+      <input type="text" formControlName="firstName" class="ctrl" />
+
+      <label>Last name <span class="req">*</span></label>
+      <input type="text" formControlName="lastName" class="ctrl" />
+
+      <label>Work email <span class="req">*</span></label>
+      <input type="email" formControlName="email" class="ctrl" autocomplete="email" />
+
+      <p class="note">
+        You'll use your Microsoft work account to sign in. We'll send setup instructions to this email.
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn" (click)="back()">Back</button>
+        <button type="button" class="btn primary" (click)="nextFromAdmin()">Continue</button>
+      </div>
+    </form>
+
+    <div *ngIf="step === 3" class="review">
+      <h2>Review</h2>
+      <dl>
+        <dt>Company</dt>
+        <dd>{{ companyForm.value.companyName }}</dd>
+        <dt>Industry</dt>
+        <dd>{{ companyForm.value.industry }}</dd>
+        <dt>Plan</dt>
+        <dd>{{ companyForm.value.plan }}</dd>
+        <dt>Standards</dt>
+        <dd>{{ isoList().join(', ') || '—' }}</dd>
+        <dt>Admin</dt>
+        <dd>{{ adminForm.value.firstName }} {{ adminForm.value.lastName }} &lt;{{ adminForm.value.email }}&gt;</dd>
+      </dl>
+      <div class="actions">
+        <button type="button" class="btn" (click)="back()">Back</button>
+        <button type="button" class="btn primary" (click)="submit()" [disabled]="submitting">
+          {{ submitting ? 'Creating…' : 'Create account' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="signup-card success" *ngIf="successEmail">
+    <h1>Your Maemo account is ready</h1>
+    <p>We've sent setup instructions to <strong>{{ successEmail }}</strong>.</p>
+    <p>
+      Your next step: connect Microsoft 365 so Maemo can store compliance documents in your SharePoint.
+    </p>
+    <button type="button" class="btn primary" (click)="goToLogin()">Go to login</button>
+  </div>
+</div>

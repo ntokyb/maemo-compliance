@@ -1,0 +1,76 @@
+<div class="destroy-document-container">
+  <div class="header">
+    <h1>Destroy Document</h1>
+    <p class="subtitle">Permanently destroy a document according to retention rules</p>
+  </div>
+
+  <div class="warning-box">
+    <h3>⚠️ Warning: This action cannot be undone</h3>
+    <p>
+      Destroying a document will mark it as destroyed and exclude it from normal queries.
+      The document will remain in the database for audit purposes but will not be accessible through normal operations.
+    </p>
+  </div>
+
+  <div class="document-info">
+    <p><strong>Document ID:</strong> {{ documentId }}</p>
+    <p><strong>Document Title:</strong> {{ documentTitle }}</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <form (ngSubmit)="destroy()" *ngIf="documentId">
+    <div class="form-group">
+      <label for="confirmationText">
+        Type the document title to confirm: <span class="required">*</span>
+      </label>
+      <input
+        type="text"
+        id="confirmationText"
+        [(ngModel)]="confirmationText"
+        name="confirmationText"
+        class="form-control"
+        placeholder="Enter document title"
+        [disabled]="destroying"
+        required>
+      <small class="help-text">You must type "{{ documentTitle }}" exactly to proceed</small>
+    </div>
+
+    <div class="form-group">
+      <label for="reason">
+        Destruction Reason <span class="required">*</span>
+      </label>
+      <textarea
+        id="reason"
+        [(ngModel)]="reason"
+        name="reason"
+        class="form-control"
+        rows="4"
+        placeholder="Provide a reason for destroying this document (minimum 10 characters)"
+        [disabled]="destroying"
+        required
+        minlength="10"></textarea>
+      <small class="help-text">This reason will be logged in the audit trail</small>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="destroying">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn-danger"
+        [disabled]="destroying || !reason || reason.length < 10 || confirmationText !== documentTitle">
+        <span *ngIf="destroying">Destroying...</span>
+        <span *ngIf="!destroying">Destroy Document</span>
+      </button>
+    </div>
+  </form>
+</div>
+

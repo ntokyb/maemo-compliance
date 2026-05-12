@@ -1,0 +1,20 @@
+# Integration tests (Testcontainers) typically run on the host:
+#   dotnet test Maemo.IntegrationTests/
+# with Docker Desktop running (PostgreSQL container per test run).
+#
+# This compose file is optional — use if you add a dedicated test DB service later.
+version: "3.8"
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: maemo_test
+      POSTGRES_USER: maemo
+      POSTGRES_PASSWORD: maemo_test_password
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maemo"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

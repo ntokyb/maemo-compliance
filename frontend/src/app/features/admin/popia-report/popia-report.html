@@ -1,0 +1,190 @@
+<div class="popia-report-container">
+  <div class="header">
+    <h1>POPIA Compliance Trail Report</h1>
+    <div class="header-actions">
+      <label for="days">Days:</label>
+      <select id="days" [(ngModel)]="days" (change)="onDaysChange()" class="form-control">
+        <option [value]="7">Last 7 days</option>
+        <option [value]="30">Last 30 days</option>
+        <option [value]="60">Last 60 days</option>
+        <option [value]="90">Last 90 days</option>
+      </select>
+      <label for="piiFilter">PII Type:</label>
+      <select id="piiFilter" [(ngModel)]="selectedPiiDataType" (change)="onPiiDataTypeFilterChange()" class="form-control">
+        <option [value]="null">All Types</option>
+        <option [value]="PiiDataType.Personal">Personal</option>
+        <option [value]="PiiDataType.SpecialPersonal">Special Personal</option>
+      </select>
+      <button (click)="loadReport()" [disabled]="loading" class="btn btn-primary">
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+      <button (click)="exportToCsv()" [disabled]="filteredItems.length === 0" class="btn btn-secondary">
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading POPIA trail report...</span>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+    <button (click)="loadReport()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div class="summary">
+      <p>
+        <strong>Total accesses:</strong> {{ filteredItems.length }}
+        <span *ngIf="filteredItems.length > 0">
+          | <strong>Documents with Personal Data:</strong> {{ getUniqueDocumentCount() }}
+        </span>
+        <span *ngIf="selectedPiiDataType !== null" class="filter-indicator">
+          | <strong>Filtered by:</strong> {{ getPiiDataTypeLabel(selectedPiiDataType) }}
+        </span>
+      </p>
+    </div>
+
+    <table class="popia-table" *ngIf="filteredItems.length > 0">
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>PII Type</th>
+          <th>Department</th>
+          <th>Accessed By</th>
+          <th>Accessed At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredItems">
+          <td>{{ item.documentTitle }}</td>
+          <td>
+            <span class="pii-badge" [class]="getPiiDataTypeClass(item.piiDataType)">
+              {{ getPiiDataTypeLabel(item.piiDataType) }}
+            </span>
+          </td>
+          <td>{{ item.department || '-' }}</td>
+          <td>{{ item.accessedBy }}</td>
+          <td>{{ formatDate(item.accessedAt) }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredItems.length === 0 && !loading" class="empty-state">
+      <p *ngIf="reportItems.length === 0">
+        No document accesses found for documents containing personal data in the last {{ days }} days.
+      </p>
+      <p *ngIf="reportItems.length > 0 && selectedPiiDataType !== null">
+        No document accesses found matching the selected filter criteria.
+      </p>
+    </div>
+  </div>
+
+  <!-- Personal Info Inventory Section -->
+  <div class="section">
+    <h2>Personal Information Inventory</h2>
+    <div *ngIf="loadingPersonalInfo" class="loading">
+      <div class="spinner"></div>
+      <span>Loading personal information inventory...</span>
+    </div>
+    <div *ngIf="!loadingPersonalInfo">
+      <p class="summary">
+        <strong>Total documents with personal information:</strong> {{ personalInfoDocuments.length }}
+      </p>
+      <table class="popia-table" *ngIf="personalInfoDocuments.length > 0">
+        <thead>
+          <tr>
+            <th>Document Title</th>
+            <th>PII Type</th>
+            <th>PII Description</th>
+            <th>Retention Period (Months)</th>
+            <th>Department</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of personalInfoDocuments">
+            <td>{{ doc.title }}</td>
+            <td>
+              <span class="pii-badge" *ngIf="doc.piiType !== undefined">
+                {{ getPiiTypeLabel(doc.piiType) }}
+              </span>
+            </td>
+            <td>{{ doc.piiDescription || '-' }}</td>
+            <td>{{ doc.piiRetentionPeriodInMonths || '-' }}</td>
+            <td>{{ doc.department || '-' }}</td>
+            <td>{{ doc.category || '-' }}</td>
+            <td>
+              <a [routerLink]="['/documents', doc.id]" class="btn-link">View</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="personalInfoDocuments.length === 0" class="empty-state">
+        <p>No documents with personal information found.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Retention Expiry List Section -->
+  <div class="section">
+    <h2>Documents Near Retention Expiry</h2>
+    <div class="header-actions">
+      <label for="retentionDays">Days Ahead:</label>
+      <select id="retentionDays" [(ngModel)]="retentionDaysAhead" (change)="onRetentionDaysChange()" class="form-control">
+        <option [value]="30">30 days</option>
+        <option [value]="60">60 days</option>
+        <option [value]="90">90 days</option>
+        <option [value]="180">180 days</option>
+      </select>
+    </div>
+    <div *ngIf="loadingRetentionExpiry" class="loading">
+      <div class="spinner"></div>
+      <span>Loading retention expiry list...</span>
+    </div>
+    <div *ngIf="!loadingRetentionExpiry">
+      <p class="summary">
+        <strong>Documents expiring in the next {{ retentionDaysAhead }} days:</strong> {{ retentionExpiryDocuments.length }}
+      </p>
+      <table class="popia-table" *ngIf="retentionExpiryDocuments.length > 0">
+        <thead>
+          <tr>
+            <th>Document Title</th>
+            <th>PII Type</th>
+            <th>Retention Period (Months)</th>
+            <th>Expiry Date</th>
+            <th>Days Remaining</th>
+            <th>Department</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of retentionExpiryDocuments" [class.urgent]="doc.retainUntil && getDaysUntilExpiry(doc.retainUntil) <= 30">
+            <td>{{ doc.title }}</td>
+            <td>
+              <span class="pii-badge" *ngIf="doc.piiType !== undefined">
+                {{ getPiiTypeLabel(doc.piiType) }}
+              </span>
+            </td>
+            <td>{{ doc.piiRetentionPeriodInMonths || '-' }}</td>
+            <td>{{ doc.retainUntil ? formatDate(doc.retainUntil) : '-' }}</td>
+            <td [class.urgent-text]="doc.retainUntil && getDaysUntilExpiry(doc.retainUntil) <= 30">
+              {{ doc.retainUntil ? getDaysUntilExpiry(doc.retainUntil) : '-' }}
+            </td>
+            <td>{{ doc.department || '-' }}</td>
+            <td>
+              <a [routerLink]="['/documents', doc.id]" class="btn-link">View</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="retentionExpiryDocuments.length === 0" class="empty-state">
+        <p>No documents expiring in the next {{ retentionDaysAhead }} days.</p>
+      </div>
+    </div>
+  </div>
+</div>
+

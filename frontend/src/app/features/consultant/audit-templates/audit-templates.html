@@ -1,0 +1,135 @@
+<div class="audit-templates-container">
+  <div class="header">
+    <h1>Audit Templates</h1>
+    <button (click)="showCreateTemplate = true" class="btn-primary">New Template</button>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <strong>Error:</strong> {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading templates...</div>
+
+  <div class="templates-layout">
+    <div class="templates-list">
+      <h2>Templates</h2>
+      <div *ngIf="templates.length === 0 && !loading" class="empty-state">
+        <p>No templates found. Create your first template to get started.</p>
+      </div>
+      <div *ngFor="let template of templates" 
+           class="template-item" 
+           [class.selected]="selectedTemplate?.id === template.id"
+           (click)="selectTemplate(template)">
+        <h3>{{ template.name }}</h3>
+        <p *ngIf="template.description" class="description">{{ template.description }}</p>
+        <span class="date">Created: {{ template.createdAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <div class="template-details" *ngIf="selectedTemplate">
+      <div class="details-header">
+        <h2>{{ selectedTemplate.name }}</h2>
+        <button (click)="showAddQuestion = true" class="btn-primary">Add Question</button>
+      </div>
+
+      <div *ngIf="selectedTemplate.description" class="description">
+        <p>{{ selectedTemplate.description }}</p>
+      </div>
+
+      <div class="questions-section">
+        <h3>Questions ({{ questions.length }})</h3>
+        <div *ngIf="questions.length === 0" class="empty-state">
+          <p>No questions yet. Add your first question to this template.</p>
+        </div>
+        <div *ngFor="let question of questions" class="question-item">
+          <div class="question-header">
+            <span class="category">{{ question.category }}</span>
+            <span class="max-score">Max Score: {{ question.maxScore }}</span>
+          </div>
+          <p class="question-text">{{ question.questionText }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Template Modal -->
+  <div *ngIf="showCreateTemplate" class="modal-overlay" (click)="cancelCreateTemplate()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Create New Template</h2>
+      <form (ngSubmit)="createTemplate()">
+        <div class="form-group">
+          <label for="template-name">Template Name *</label>
+          <input 
+            type="text" 
+            id="template-name"
+            [(ngModel)]="newTemplate.name" 
+            name="name"
+            required
+            class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="template-description">Description</label>
+          <textarea 
+            id="template-description"
+            [(ngModel)]="newTemplate.description" 
+            name="description"
+            rows="4"
+            class="form-input"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" (click)="cancelCreateTemplate()" class="btn-secondary">Cancel</button>
+          <button type="submit" [disabled]="saving" class="btn-primary">
+            {{ saving ? 'Creating...' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Question Modal -->
+  <div *ngIf="showAddQuestion" class="modal-overlay" (click)="cancelAddQuestion()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Add Question</h2>
+      <form (ngSubmit)="addQuestion()">
+        <div class="form-group">
+          <label for="question-category">Category *</label>
+          <input 
+            type="text" 
+            id="question-category"
+            [(ngModel)]="newQuestion.category" 
+            name="category"
+            required
+            class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="question-text">Question Text *</label>
+          <textarea 
+            id="question-text"
+            [(ngModel)]="newQuestion.questionText" 
+            name="questionText"
+            required
+            rows="4"
+            class="form-input"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="max-score">Max Score</label>
+          <input 
+            type="number" 
+            id="max-score"
+            [(ngModel)]="newQuestion.maxScore" 
+            name="maxScore"
+            min="1"
+            max="10"
+            class="form-input">
+        </div>
+        <div class="modal-actions">
+          <button type="button" (click)="cancelAddQuestion()" class="btn-secondary">Cancel</button>
+          <button type="submit" [disabled]="saving" class="btn-primary">
+            {{ saving ? 'Adding...' : 'Add Question' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,72 @@
+<div class="dashboard">
+  <h2>Admin Dashboard</h2>
+  
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <span>Loading dashboard...</span>
+  </div>
+  
+  <div *ngIf="error && !loading" class="error">{{ error }}</div>
+
+  <div *ngIf="summary && !loading; else noData" class="dashboard-grid">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Total Tenants</h3>
+      </div>
+      <div class="card-value">{{ summary.totalTenants }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Active Tenants</h3>
+      </div>
+      <div class="card-value">{{ summary.activeTenants }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Suspended Tenants</h3>
+      </div>
+      <div class="card-value">{{ summary.suspendedTenants }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Trial Tenants</h3>
+      </div>
+      <div class="card-value">{{ summary.trialTenants }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>API Calls (24h)</h3>
+      </div>
+      <div class="card-value">{{ summary.totalApiCallsLast24h }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Errors (24h)</h3>
+      </div>
+      <div class="card-value">{{ summary.totalErrorsLast24h }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Webhook Failures (24h)</h3>
+      </div>
+      <div class="card-value">{{ summary.webhookFailuresLast24h }}</div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Worker Failures (24h)</h3>
+      </div>
+      <div class="card-value">{{ summary.workerFailuresLast24h }}</div>
+    </div>
+  </div>
+
+  <ng-template #noData>
+    <div *ngIf="!loading" class="no-data">No dashboard data available</div>
+  </ng-template>
+</div>

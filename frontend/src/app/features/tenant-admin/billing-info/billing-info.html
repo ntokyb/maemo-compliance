@@ -1,0 +1,49 @@
+<div class="billing-info-container">
+  <div class="header">
+    <h1>Billing Information</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading billing information...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="tenant && !loading" class="billing-content">
+    <div class="info-section">
+      <h2>Current Plan</h2>
+      <div class="info-item">
+        <span class="label">Plan:</span>
+        <span class="value">{{ tenant.plan || 'Not specified' }}</span>
+      </div>
+    </div>
+
+    <div class="info-section" *ngIf="tenant.subscriptionId">
+      <h2>Subscription</h2>
+      <div class="info-item">
+        <span class="label">Subscription ID:</span>
+        <span class="value">{{ tenant.subscriptionId }}</span>
+      </div>
+    </div>
+
+    <div class="info-section" *ngIf="tenant.trialEndsAt">
+      <h2>Trial</h2>
+      <div class="info-item">
+        <span class="label">Trial Ends:</span>
+        <span class="value">{{ tenant.trialEndsAt | date:'medium' }}</span>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button 
+        type="button" 
+        class="btn btn-danger" 
+        (click)="cancelSubscription()" 
+        [disabled]="canceling || !tenant.subscriptionId">
+        {{ canceling ? 'Canceling...' : 'Cancel Subscription' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Back</button>
+    </div>
+  </div>
+</div>
+
