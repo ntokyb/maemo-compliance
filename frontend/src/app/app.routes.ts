@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { MsalGuard } from '@azure/msal-angular';
 import { tenantGuard } from './guards/tenant.guard';
 import { tenantModuleGuard } from './guards/tenant-module.guard';
 import { userOnboardingGuard } from './guards/user-onboarding.guard';
 import { onboardingPageGuard } from './guards/onboarding-page.guard';
 import { platformAdminGuard } from './guards/platform-admin.guard';
+import { portalAuthGuard } from './guards/portal-auth.guard';
+import { companySetupGuard } from './guards/company-setup.guard';
 
 export const routes: Routes = [
   {
@@ -35,7 +36,34 @@ export const routes: Routes = [
   },
   {
     path: 'signup',
-    loadComponent: () => import('./features/public/signup/signup.component').then(m => m.SignupComponent)
+    loadComponent: () => import('./features/public/signup/signup.component').then((m) => m.SignupComponent),
+  },
+  {
+    path: 'verify',
+    loadComponent: () =>
+      import('./features/public/verify-email/verify-email.component').then((m) => m.VerifyEmailComponent),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/public/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/public/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent),
+  },
+  {
+    path: 'setup',
+    loadComponent: () =>
+      import('./features/setup/company-setup.component').then((m) => m.CompanySetupComponent),
+    canActivate: [portalAuthGuard, tenantGuard],
+  },
+  {
+    path: 'account-pending',
+    loadComponent: () =>
+      import('./features/public/account-pending/account-pending.component').then((m) => m.AccountPendingComponent),
+    canActivate: [portalAuthGuard],
   },
   {
     path: 'onboarding',
@@ -43,12 +71,12 @@ export const routes: Routes = [
       import('./features/onboarding/user-onboarding-page/user-onboarding-page.component').then(
         m => m.UserOnboardingPageComponent
       ),
-    canActivate: [MsalGuard, tenantGuard, onboardingPageGuard]
+    canActivate: [portalAuthGuard, tenantGuard, onboardingPageGuard]
   },
   {
     path: '',
     loadComponent: () => import('./components/layout/layout').then(m => m.Layout),
-    canActivate: [MsalGuard, tenantGuard, userOnboardingGuard],
+    canActivate: [portalAuthGuard, tenantGuard, companySetupGuard, userOnboardingGuard],
     children: [
       {
         path: '',

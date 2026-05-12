@@ -1,0 +1,65 @@
+<div class="wizard">
+  <div class="progress">
+    <span *ngFor="let _ of [1, 2, 3, 4]; let i = index" [class.on]="step > i"></span>
+  </div>
+
+  <section *ngIf="step === 1" class="panel">
+    <h1>Welcome to Maemo Compliance, {{ firstName }}!</h1>
+    <p>Let’s set up <strong>{{ companyName }}</strong> in a few quick steps.</p>
+  </section>
+
+  <section *ngIf="step === 2" class="panel">
+    <h1>Tell us about {{ companyName }}</h1>
+    <form [formGroup]="profileForm" (ngSubmit)="continueProfile()">
+      <label>Optional logo URL</label>
+      <input type="url" formControlName="logoUrl" class="ctrl" placeholder="https://…" />
+      <label>City</label>
+      <input type="text" formControlName="city" class="ctrl" />
+      <label>Province</label>
+      <input type="text" formControlName="province" class="ctrl" />
+      <p *ngIf="error" class="err">{{ error }}</p>
+      <button type="submit" class="btn primary" [disabled]="saving">{{ saving ? 'Saving…' : 'Continue' }}</button>
+    </form>
+  </section>
+
+  <section *ngIf="step === 3" class="panel">
+    <h1>What are you working towards?</h1>
+    <p class="hint">Select at least one.</p>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdIso9001" [ngModelOptions]="{ standalone: true }" /> ISO 9001 — Quality</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdIso14001" [ngModelOptions]="{ standalone: true }" /> ISO 14001 — Environmental</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdIso45001" [ngModelOptions]="{ standalone: true }" /> ISO 45001 — Health &amp; Safety</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdIso27001" [ngModelOptions]="{ standalone: true }" /> ISO 27001 — Information Security</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdPopia" [ngModelOptions]="{ standalone: true }" /> POPIA</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="stdOther" [ngModelOptions]="{ standalone: true }" /> Other</label>
+    <p *ngIf="error" class="err">{{ error }}</p>
+    <button type="button" class="btn primary" (click)="continueStandards()" [disabled]="saving">
+      {{ saving ? 'Saving…' : 'Continue' }}
+    </button>
+  </section>
+
+  <section *ngIf="step === 4" class="panel">
+    <h1>Invite your team</h1>
+    <p class="hint">Optional — you can add people later.</p>
+    <div *ngFor="let row of inviteEntries; let i = index" class="row">
+      <input type="email" [(ngModel)]="row.email" [ngModelOptions]="{ standalone: true }" class="ctrl" placeholder="colleague@company.com" />
+      <select [(ngModel)]="row.role" [ngModelOptions]="{ standalone: true }" class="ctrl narrow">
+        <option value="Admin">Admin</option>
+        <option value="Manager">Manager</option>
+        <option value="Viewer">Viewer</option>
+      </select>
+      <button type="button" class="btn ghost" (click)="removeInviteRow(i)" *ngIf="inviteEntries.length > 1">Remove</button>
+    </div>
+    <button type="button" class="btn ghost" (click)="addInviteRow()" *ngIf="inviteEntries.length < 5">+ Add person</button>
+    <p *ngIf="error" class="err">{{ error }}</p>
+    <div class="actions">
+      <button type="button" class="btn primary" (click)="sendInvites()" [disabled]="saving">Send invites</button>
+      <button type="button" class="btn link" (click)="skipInvites()" [disabled]="saving">Skip for now</button>
+    </div>
+  </section>
+
+  <section *ngIf="step === 5" class="panel done">
+    <h1>You’re all set!</h1>
+    <p>{{ companyName }} is ready for compliance tracking.</p>
+    <button type="button" class="btn primary" (click)="goDashboard()">Go to dashboard</button>
+  </section>
+</div>

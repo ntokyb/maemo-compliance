@@ -55,5 +55,23 @@ public class Tenant : BaseEntity
     /// JSON: { "dismissed": bool } for post-login checklist; step completion is derived from tenant data on read.
     /// </summary>
     public string? OnboardingStepsCompletedJson { get; set; }
+
+    /// <summary>First-time company setup wizard (signup flow); separate from post-login onboarding checklist.</summary>
+    public bool SetupComplete { get; set; }
+
+    /// <summary>0 = not started, 1–3 = wizard steps, 4 = finished screen.</summary>
+    public int SetupStep { get; set; }
+
+    /// <summary>JSON array of standard codes selected during setup (e.g. ISO 9001).</summary>
+    public string? TargetStandardsJson { get; set; }
+
+    /// <summary>Optional profile hints from the setup wizard.</summary>
+    public string? Industry { get; set; }
+
+    public string? CompanySize { get; set; }
+
+    public string? City { get; set; }
+
+    public string? Province { get; set; }
 }
 

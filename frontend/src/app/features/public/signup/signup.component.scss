@@ -8,14 +8,125 @@
   color: $public-text;
 }
 
-main {
-  flex: 1;
-  padding: 2.5rem 0 3rem;
+.desktop-only {
+  @media (max-width: 900px) {
+    display: none;
+  }
 }
 
-.contain {
-  @include public-container;
-  max-width: 36rem;
+.layout {
+  display: flex;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 3rem;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+}
+
+.right {
+  flex: 0 0 320px;
+  background: #f8fafc;
+  border: 1px solid $public-border;
+  border-radius: 12px;
+  padding: 1.5rem;
+  h2 {
+    font-size: 1.15rem;
+    margin-top: 0;
+  }
+  ul {
+    padding-left: 1.1rem;
+    margin: 0;
+    line-height: 1.6;
+    color: $public-muted;
+  }
+}
+
+.steps {
+  font-size: 0.85rem;
+  color: $public-muted;
+  margin: 0 0 0.35rem;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.row-btns {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: $public-primary;
+  border: 1px solid $public-border;
+}
+
+.btn.primary {
+  background: #0f4c81;
+}
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.plan {
+  text-align: left;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1.5px solid $public-border;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  strong {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  span {
+    font-size: 0.9rem;
+    color: $public-muted;
+  }
+  &.on {
+    border-color: #0f4c81;
+    box-shadow: 0 0 0 2px rgba(15, 76, 129, 0.15);
+  }
+}
+
+.hint {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.done {
+  h1 {
+    margin-top: 0;
+  }
+}
+
+.muted {
+  margin-top: 1.5rem;
+  color: $public-muted;
+  font-size: 0.9rem;
+  a {
+    color: $public-primary;
+  }
 }
 
 h1 {

@@ -1,20 +1,49 @@
 <div class="login-container" [style.background-image]="branding?.loginBannerUrl ? 'url(' + branding?.loginBannerUrl + ')' : ''">
   <div class="login-card">
-    <img *ngIf="branding?.logoUrl" [src]="branding?.logoUrl" alt="Logo" class="login-logo">
-    <h1>Maemo Portal</h1>
-    <p>Sign in to access the Maemo Governance, Risk & Compliance system</p>
-    <button type="button" data-testid="login-button" (click)="login()" class="login-btn" [style.background-color]="branding?.primaryColor || ''">Sign in with Microsoft</button>
-    <p class="signup-hint"><a routerLink="/signup">Create a new company workspace</a></p>
-    
-    <!-- Demo Mode Option -->
+    <img *ngIf="branding?.logoUrl" [src]="branding?.logoUrl" alt="Logo" class="login-logo" />
+    <h1>Maemo Compliance</h1>
+    <p class="subtitle">Sign in to your workspace</p>
+
+    <div *ngIf="verifyHint" class="banner info">{{ verifyHint }}</div>
+
+    <div class="tabs">
+      <button type="button" class="tab" [class.active]="tab === 'email'" (click)="setTab('email')">Email &amp; password</button>
+      <button type="button" class="tab" [class.active]="tab === 'microsoft'" (click)="setTab('microsoft')">Microsoft</button>
+    </div>
+
+    <form *ngIf="tab === 'email'" [formGroup]="loginForm" (ngSubmit)="submitLocal()" class="local-form">
+      <div *ngIf="localError" class="banner err">{{ localError }}</div>
+      <label for="em">Email</label>
+      <input id="em" type="email" formControlName="email" class="ctrl" autocomplete="email" />
+      <label for="pw">Password</label>
+      <input id="pw" type="password" formControlName="password" class="ctrl" autocomplete="current-password" />
+      <button type="submit" class="login-btn" [disabled]="localLoading">Sign in</button>
+      <p class="links">
+        <a routerLink="/forgot-password">Forgot password?</a>
+        &nbsp;·&nbsp;
+        <a routerLink="/signup">Create an account</a>
+      </p>
+    </form>
+
+    <div *ngIf="tab === 'microsoft'" class="ms-block">
+      <button
+        type="button"
+        data-testid="login-button"
+        (click)="loginMicrosoft()"
+        class="login-btn"
+        [style.background-color]="branding?.primaryColor || ''"
+      >
+        Sign in with Microsoft
+      </button>
+      <p class="helper">For organisations using Microsoft 365 or Microsoft Entra ID.</p>
+      <p class="links"><a routerLink="/signup">Create an account</a></p>
+    </div>
+
     <div class="demo-section">
       <div class="demo-divider">
         <span>or</span>
       </div>
-      <button 
-        (click)="switchToDemo()" 
-        [disabled]="demoLoading"
-        class="demo-btn">
+      <button (click)="switchToDemo()" [disabled]="demoLoading" class="demo-btn">
         <span *ngIf="!demoLoading">Explore Demo Manufacturing Co.</span>
         <span *ngIf="demoLoading">Loading...</span>
       </button>

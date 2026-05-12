@@ -18,6 +18,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using MaemoCompliance.Infrastructure.Logging;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Text.Json;
 
 // Configure initial logger (will be replaced after full configuration)
@@ -307,16 +309,85 @@ For external integrations, always use `/engine/v1` endpoints.
         });
     });
 
-    // Configure Authentication
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "maemo-compliance.co.za";
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "maemo-compliance.co.za";
+    var jwtKey = builder.Configuration["Jwt:Key"] ?? "";
+    if (jwtKey.Length < 32 && builder.Environment.IsDevelopment())
+    {
+        jwtKey = "development-only-change-me-32-chars-min!!";
+    }
+
+    builder.Services.AddSingleton<LocalJwtTokenFactory>();
+
+    // Configure Authentication — local symmetric JWT + Azure AD + API keys
     builder.Services
         .AddAuthentication(options =>
         {
-            // Default scheme is JWT Bearer
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = MaemoAuthSchemes.SmartJwt;
+            options.DefaultAuthenticateScheme = MaemoAuthSchemes.SmartJwt;
+            options.DefaultChallengeScheme = MaemoAuthSchemes.SmartJwt;
         })
-        .AddJwtBearer(options =>
+        .AddPolicyScheme(MaemoAuthSchemes.SmartJwt, MaemoAuthSchemes.SmartJwt, options =>
+        {
+            options.ForwardDefaultSelector = context =>
+            {
+                var auth = context.Request.Headers.Authorization.ToString();
+                if (auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    var token = auth["Bearer ".Length..].Trim();
+                    try
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        if (handler.CanReadToken(token))
+                        {
+                            var jwt = handler.ReadJwtToken(token);
+                            if (string.Equals(jwt.Issuer, jwtIssuer, StringComparison.Ordinal))
+                            {
+                                return MaemoAuthSchemes.LocalJwt;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Use Azure AD validation
+                    }
+                }
+
+                return MaemoAuthSchemes.AzureAd;
+            };
+        })
+        .AddJwtBearer(MaemoAuthSchemes.LocalJwt, options =>
+        {
+            if (jwtKey.Length < 32)
+            {
+                throw new InvalidOperationException(
+                    "Jwt:Key must be configured with at least 32 characters outside Development.");
+            }
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtIssuer,
+                ValidateAudience = true,
+                ValidAudience = jwtAudience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                ClockSkew = TimeSpan.FromMinutes(2)
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    if (string.IsNullOrEmpty(context.Request.Headers.Authorization))
+                    {
+                        context.NoResult();
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+        })
+        .AddJwtBearer(MaemoAuthSchemes.AzureAd, options =>
         {
             options.Authority = builder.Configuration["Authentication:Authority"];
             options.Audience = builder.Configuration["Authentication:Audience"];
@@ -327,13 +398,10 @@ For external integrations, always use `/engine/v1` endpoints.
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true
             };
-            // Don't fail if no token is present - allow API Key auth to be tried
-            options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+            options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>
                 {
-                    // If authentication fails and no token was provided, don't fail
-                    // This allows API Key authentication to be tried
                     if (string.IsNullOrEmpty(context.Request.Headers.Authorization))
                     {
                         context.NoResult();
@@ -342,7 +410,9 @@ For external integrations, always use `/engine/v1` endpoints.
                 }
             };
         })
-        .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
+        .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+            MaemoAuthSchemes.ApiKey,
+            null);
 
     // Add Authorization with role-based policies
     builder.Services.AddAuthorization(options =>
@@ -391,21 +461,22 @@ For external integrations, always use `/engine/v1` endpoints.
 
         // EngineClients policy - allows either JWT user auth OR API Key auth
         options.AddPolicy("EngineClients", policy =>
+        {
+            policy.AddAuthenticationSchemes(MaemoAuthSchemes.SmartJwt, MaemoAuthSchemes.ApiKey);
             policy.RequireAssertion(context =>
             {
-                // Allow if authenticated via API Key (has ApiKeyClient role)
-                if (context.User.HasClaim(c => 
-                    c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "ApiKeyClient"))
+                if (context.User.HasClaim(c =>
+                        c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "ApiKeyClient"))
                 {
                     return true;
                 }
 
-                // Allow if authenticated via JWT (has any role claim)
-                return context.User.HasClaim(c => 
-                    c.Type == System.Security.Claims.ClaimTypes.Role || 
-                    c.Type == "role" || 
+                return context.User.HasClaim(c =>
+                    c.Type == System.Security.Claims.ClaimTypes.Role ||
+                    c.Type == "role" ||
                     c.Type == "roles");
-            }));
+            });
+        });
     });
 
     // Add Application services (MediatR)
@@ -612,6 +683,7 @@ For external integrations, always use `/engine/v1` endpoints.
     app.MapRisksEndpoints();
 
     app.MapPublicSignupEndpoints();
+    app.MapAuthEndpoints();
     app.MapPublicMarketingEndpoints();
 
     // Tenant endpoints (Portal)

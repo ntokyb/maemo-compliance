@@ -45,6 +45,16 @@ public class ApproveAccessRequestCommandHandler : IRequestHandler<ApproveAccessR
             throw new InvalidOperationException("Request is not pending.");
         }
 
+        if (ar.CreatedTenantId is Guid preTenantId)
+        {
+            await ActivatePreProvisionedGrowthTenant(
+                ar,
+                request,
+                preTenantId,
+                cancellationToken);
+            return;
+        }
+
         var provisionPlan = MapPlan(request.Plan);
         if (provisionPlan == null)
         {
@@ -149,5 +159,57 @@ public class ApproveAccessRequestCommandHandler : IRequestHandler<ApproveAccessR
         {
             return new List<string>();
         }
+    }
+
+    private async Task ActivatePreProvisionedGrowthTenant(
+        AccessRequest ar,
+        ApproveAccessRequestCommand request,
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var provisionPlan = MapPlan(request.Plan);
+        if (provisionPlan == null)
+        {
+            throw new ArgumentException("Plan must be Starter, Growth, or Enterprise.");
+        }
+
+        var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId, cancellationToken)
+            ?? throw new InvalidOperationException("Linked tenant not found.");
+
+        if (tenant.IsActive)
+        {
+            throw new InvalidOperationException("Tenant is already active.");
+        }
+
+        var emailNorm = ar.ContactEmail.Trim().ToLowerInvariant();
+        if (!string.Equals(tenant.AdminEmail.Trim().ToLowerInvariant(), emailNorm, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Access request does not match the linked tenant.");
+        }
+
+        tenant.IsActive = true;
+        tenant.Plan = provisionPlan;
+        tenant.ModifiedAt = _clock.UtcNow;
+        tenant.ModifiedBy = _currentUser.UserEmail ?? _currentUser.UserId ?? "PlatformAdmin";
+
+        var now = _clock.UtcNow;
+        ar.Status = AccessRequestStatus.Approved;
+        ar.ReviewedAt = now;
+        ar.ReviewedBy = _currentUser.UserEmail ?? _currentUser.UserId;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var baseUrl = (_configuration["App:PublicPortalUrl"] ?? "").TrimEnd('/');
+        var loginLink = string.IsNullOrEmpty(baseUrl) ? "/login" : $"{baseUrl}/login";
+
+        var body =
+            $"Good news — {tenant.Name} has been approved on Maemo Compliance.\n\n" +
+            $"Sign in with the email and password you used when you registered: {loginLink}\n";
+
+        await _emailSender.SendAsync(
+            ar.ContactEmail.Trim(),
+            $"Your Maemo workspace is active — {tenant.Name}",
+            body,
+            cancellationToken);
     }
 }

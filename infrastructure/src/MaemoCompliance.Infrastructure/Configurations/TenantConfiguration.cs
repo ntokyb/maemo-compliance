@@ -69,6 +69,16 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(t => t.OnboardingCompletedAt);
 
+        builder.Property(t => t.OnboardingStepsCompletedJson);
+
+        builder.Property(t => t.SetupComplete).HasDefaultValue(false);
+        builder.Property(t => t.SetupStep).HasDefaultValue(0);
+        builder.Property(t => t.TargetStandardsJson).HasMaxLength(2000);
+        builder.Property(t => t.Industry).HasMaxLength(120);
+        builder.Property(t => t.CompanySize).HasMaxLength(50);
+        builder.Property(t => t.City).HasMaxLength(120);
+        builder.Property(t => t.Province).HasMaxLength(120);
+
         builder.Property(t => t.CreatedBy)
             .HasMaxLength(100);
 

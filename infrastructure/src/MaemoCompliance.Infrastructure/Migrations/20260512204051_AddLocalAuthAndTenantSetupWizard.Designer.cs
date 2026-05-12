@@ -3,6 +3,7 @@ using System;
 using MaemoCompliance.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MaemoCompliance.Infrastructure.Migrations
 {
     [DbContext(typeof(MaemoComplianceDbContext))]
-    partial class MaemoComplianceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260512204051_AddLocalAuthAndTenantSetupWizard")]
+    partial class AddLocalAuthAndTenantSetupWizard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

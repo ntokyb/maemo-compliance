@@ -32,6 +32,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.LastLoginAt);
 
+        builder.Property(u => u.PasswordHash).HasMaxLength(500);
+        builder.Property(u => u.EmailVerificationToken).HasMaxLength(100);
+        builder.Property(u => u.EmailVerified).HasDefaultValue(false);
+        builder.Property(u => u.EmailVerifiedAt);
+        builder.Property(u => u.PasswordResetToken).HasMaxLength(100);
+        builder.Property(u => u.PasswordResetExpiresAt);
+        builder.Property(u => u.AuthProvider).HasMaxLength(32).HasDefaultValue("Local");
+
         builder.Property(u => u.OnboardingComplete)
             .IsRequired()
             .HasDefaultValue(false);

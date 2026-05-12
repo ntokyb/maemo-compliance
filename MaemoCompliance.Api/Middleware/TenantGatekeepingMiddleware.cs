@@ -33,6 +33,12 @@ public class TenantGatekeepingMiddleware
             return;
         }
 
+        if (path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(context);
+            return;
+        }
+
         // Skip if no tenant context (will be handled by other middleware/guards)
         if (!tenantContext.TenantId.HasValue)
         {
@@ -57,6 +63,12 @@ public class TenantGatekeepingMiddleware
         // Check if tenant is suspended
         if (!tenant.IsActive)
         {
+            if (path.StartsWith("/api/onboarding/status", StringComparison.OrdinalIgnoreCase))
+            {
+                await _next(context);
+                return;
+            }
+
             // Block Portal and Engine endpoints for suspended tenants
             if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) ||
                 path.StartsWith("/engine/v1/", StringComparison.OrdinalIgnoreCase))

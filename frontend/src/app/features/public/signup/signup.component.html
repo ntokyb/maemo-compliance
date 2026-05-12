@@ -1,60 +1,104 @@
 <div class="public-page">
   <app-public-header />
-  <main class="contain">
-    <h1>Request access</h1>
-    <p class="lead">
-      Tell us about your organisation. Our team reviews every request and will follow up within one business day.
-    </p>
+  <main class="layout">
+    <div class="left">
+      <p class="steps" *ngIf="!successMessage">Step {{ step }} of 3</p>
+      <h1 *ngIf="!successMessage">Start your compliance workspace</h1>
+      <p class="lead" *ngIf="!successMessage">Create your account in a few minutes. Starter is free to try.</p>
 
-    <div *ngIf="success" class="banner ok">
-      Request received! We will review your application and contact you within 1 business day.
-    </div>
+      <div *ngIf="successMessage" class="done">
+        <h1>{{ requiresReview ? 'Application received' : 'Check your email' }}</h1>
+        <p>{{ successMessage }}</p>
+        <p *ngIf="!requiresReview">We sent a verification link — you can close this tab once you’re done.</p>
+        <p><a routerLink="/login">Back to sign in</a></p>
+      </div>
 
-    <form *ngIf="!success" [formGroup]="form" (ngSubmit)="submit()" class="form">
       <div *ngIf="error" class="banner err">{{ error }}</div>
 
-      <label>Company name <span class="req">*</span></label>
-      <input type="text" formControlName="companyName" class="ctrl" />
+      <form *ngIf="!successMessage && step === 1" [formGroup]="step1" (ngSubmit)="nextFrom1()" class="form">
+        <div class="row2">
+          <div>
+            <label>First name <span class="req">*</span></label>
+            <input type="text" formControlName="firstName" class="ctrl" />
+          </div>
+          <div>
+            <label>Last name <span class="req">*</span></label>
+            <input type="text" formControlName="lastName" class="ctrl" />
+          </div>
+        </div>
+        <label>Work email <span class="req">*</span></label>
+        <input type="email" formControlName="email" class="ctrl" autocomplete="email" />
+        <label>Password <span class="req">*</span></label>
+        <input type="password" formControlName="password" class="ctrl" autocomplete="new-password" />
+        <label>Confirm password <span class="req">*</span></label>
+        <input type="password" formControlName="confirm" class="ctrl" autocomplete="new-password" />
+        <button type="submit" class="btn primary">Continue</button>
+      </form>
 
-      <label>Industry <span class="req">*</span></label>
-      <select formControlName="industry" class="ctrl">
-        <option *ngFor="let i of industries" [value]="i">{{ i }}</option>
-      </select>
+      <form *ngIf="!successMessage && step === 2" [formGroup]="step2" (ngSubmit)="nextFrom2()" class="form">
+        <label>Company name <span class="req">*</span></label>
+        <input type="text" formControlName="companyName" class="ctrl" />
+        <label>Industry</label>
+        <select formControlName="industry" class="ctrl">
+          <option *ngFor="let i of industries" [value]="i">{{ i }}</option>
+        </select>
+        <label>Company size</label>
+        <select formControlName="companySize" class="ctrl">
+          <option *ngFor="let s of companySizes" [value]="s">{{ s }}</option>
+        </select>
+        <fieldset class="iso">
+          <legend>Compliance focus <span class="req">*</span></legend>
+          <label class="chk"><input type="checkbox" formControlName="iso9001" /> ISO 9001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso14001" /> ISO 14001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso45001" /> ISO 45001</label>
+          <label class="chk"><input type="checkbox" formControlName="iso27001" /> ISO 27001</label>
+          <label class="chk"><input type="checkbox" formControlName="popia" /> POPIA</label>
+          <label class="chk"><input type="checkbox" formControlName="other" /> Other</label>
+        </fieldset>
+        <div class="row-btns">
+          <button type="button" class="btn ghost" (click)="step = 1">Back</button>
+          <button type="submit" class="btn primary">Continue</button>
+        </div>
+      </form>
 
-      <label>Company size <span class="req">*</span></label>
-      <select formControlName="companySize" class="ctrl">
-        <option *ngFor="let s of companySizes" [value]="s">{{ s }}</option>
-      </select>
+      <div *ngIf="!successMessage && step === 3" class="form">
+        <div class="plans">
+          <button
+            type="button"
+            class="plan"
+            [class.on]="selectedPlan === 'Starter'"
+            (click)="choosePlan('Starter')"
+          >
+            <strong>Starter</strong>
+            <span>Free trial · up to 5 users · core modules</span>
+          </button>
+          <button type="button" class="plan" [class.on]="selectedPlan === 'Growth'" (click)="choosePlan('Growth')">
+            <strong>Growth</strong>
+            <span>Paid · review within 1 business day · expanded limits</span>
+          </button>
+        </div>
+        <p *ngIf="selectedPlan === 'Growth'" class="hint">
+          Your workspace stays inactive until our team approves it. You can still verify your email.
+        </p>
+        <div class="row-btns">
+          <button type="button" class="btn ghost" (click)="step = 2">Back</button>
+          <button type="button" class="btn primary" (click)="submit()" [disabled]="submitting || !selectedPlan">
+            {{ submitting ? 'Creating…' : 'Create workspace' }}
+          </button>
+        </div>
+      </div>
 
-      <label>Your name <span class="req">*</span></label>
-      <input type="text" formControlName="contactName" class="ctrl" />
-
-      <label>Your email <span class="req">*</span></label>
-      <input type="email" formControlName="contactEmail" class="ctrl" autocomplete="email" />
-
-      <label>Your role <span class="req">*</span></label>
-      <select formControlName="contactRole" class="ctrl">
-        <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-      </select>
-
-      <fieldset class="iso">
-        <legend>ISO standards you are targeting <span class="req">*</span></legend>
-        <label class="chk"><input type="checkbox" formControlName="iso9001" /> ISO 9001</label>
-        <label class="chk"><input type="checkbox" formControlName="iso14001" /> ISO 14001</label>
-        <label class="chk"><input type="checkbox" formControlName="iso45001" /> ISO 45001</label>
-        <label class="chk"><input type="checkbox" formControlName="iso27001" /> ISO 27001</label>
-        <label class="chk"><input type="checkbox" formControlName="isoOther" /> Other</label>
-      </fieldset>
-
-      <label>How did you hear about us? <span class="req">*</span></label>
-      <select formControlName="referralSource" class="ctrl">
-        <option *ngFor="let o of referralOptions" [value]="o">{{ o }}</option>
-      </select>
-
-      <button type="submit" class="btn primary" [disabled]="submitting">
-        {{ submitting ? 'Sending…' : 'Request access' }}
-      </button>
-    </form>
+      <p class="muted" *ngIf="!successMessage">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+    <aside class="right desktop-only">
+      <h2>Built for South African compliance teams</h2>
+      <ul>
+        <li>ISO 9001, 14001, 45001 ready</li>
+        <li>Document control &amp; audit trail</li>
+        <li>NCRs, risks, and audits in one place</li>
+        <li>Works with or without Microsoft 365</li>
+      </ul>
+    </aside>
   </main>
   <app-public-footer />
 </div>

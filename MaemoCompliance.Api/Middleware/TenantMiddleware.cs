@@ -15,22 +15,32 @@ public class TenantMiddleware
 
     public async Task InvokeAsync(HttpContext context, TenantContext tenantContext, IWebHostEnvironment environment)
     {
-        // Check if user is authenticated via API Key
-        // API Key authentication sets NameIdentifier claim to TenantId
+        var path = context.Request.Path.Value ?? "";
+
         if (context.User.Identity?.IsAuthenticated == true)
         {
-            var nameIdentifierClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (nameIdentifierClaim != null && Guid.TryParse(nameIdentifierClaim.Value, out var tenantIdFromClaim))
+            var isApiKey = context.User.HasClaim(c =>
+                c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "ApiKeyClient");
+            if (isApiKey)
             {
-                // If authenticated via API Key, use the TenantId from the claim
-                // API Key auth sets NameIdentifier to the ApiKey's TenantId
-                tenantContext.TenantId = tenantIdFromClaim;
+                var nameIdentifierClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (nameIdentifierClaim != null && Guid.TryParse(nameIdentifierClaim.Value, out var tenantIdFromKey))
+                {
+                    tenantContext.TenantId = tenantIdFromKey;
+                    await _next(context);
+                    return;
+                }
+            }
+
+            var tenantFromJwt = context.User.FindFirst("tenant_id");
+            if (tenantFromJwt != null && Guid.TryParse(tenantFromJwt.Value, out var tidJwt))
+            {
+                tenantContext.TenantId = tidJwt;
                 await _next(context);
                 return;
             }
         }
 
-        // Fallback to X-Tenant-Id header (for JWT-based auth)
         if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader))
         {
             var tenantIdString = tenantIdHeader.ToString();
@@ -39,14 +49,16 @@ public class TenantMiddleware
                 tenantContext.TenantId = tenantId;
             }
         }
-        else if (environment.IsDevelopment())
+        else if (environment.IsDevelopment() && !ShouldSkipDevDefaultTenant(path))
         {
-            // In development, use default tenant if no header is provided
-            // This allows the app to work without requiring tenant header
             tenantContext.TenantId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         }
 
         await _next(context);
     }
+
+    private static bool ShouldSkipDevDefaultTenant(string path) =>
+        path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/public", StringComparison.OrdinalIgnoreCase);
 }
 

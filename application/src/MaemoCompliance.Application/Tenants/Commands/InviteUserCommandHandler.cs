@@ -107,16 +107,19 @@ public class InviteUserCommandHandler : IRequestHandler<InviteUserCommand, Guid>
 
     private static UserRole ParseRole(string roleName)
     {
-        if (string.Equals(roleName, "TenantAdmin", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(roleName, "TenantAdmin", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(roleName, "Admin", StringComparison.OrdinalIgnoreCase))
         {
             return UserRole.TenantAdmin;
         }
 
-        if (string.Equals(roleName, "User", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(roleName, "User", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(roleName, "Manager", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(roleName, "Viewer", StringComparison.OrdinalIgnoreCase))
         {
             return UserRole.TenantUser;
         }
 
-        throw new ArgumentException("Role must be TenantAdmin or User.");
+        throw new ArgumentException("Role must be Admin, TenantAdmin, Manager, Viewer, or User.");
     }
 }
