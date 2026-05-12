@@ -1,0 +1,13 @@
+using Maemo.Application.Documents.Dtos;
+using MediatR;
+
+namespace Maemo.Application.Documents.Queries;
+
+/// <summary>
+/// Query to get all versions of a document.
+/// </summary>
+public class GetDocumentVersionsQuery : IRequest<IReadOnlyList<DocumentVersionDto>>
+{
+    public Guid DocumentId { get; set; }
+}
+

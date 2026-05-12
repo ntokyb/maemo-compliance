@@ -1,0 +1,90 @@
+# Maemo: .NET 8 backend (Maemo.sln) + Angular portal (frontend/).
+# Tests: Maemo.UnitTests / Maemo.IntegrationTests (Testcontainers; Docker on runner).
+# When you add Playwright E2E, reintroduce a job like the template (chromium + STAGING_URL).
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build solution
+        run: dotnet build Maemo.sln -c Release
+
+      # Maemo uses separate test projects (no xUnit Category=Unit/Integration traits).
+      - name: Run unit tests
+        run: dotnet test Maemo.UnitTests/Maemo.UnitTests.csproj -c Release --no-build
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build solution
+        run: dotnet build Maemo.sln -c Release
+
+      - name: Run integration tests
+        run: dotnet test Maemo.IntegrationTests/Maemo.IntegrationTests.csproj -c Release --no-build
+        env:
+          # GitHub-hosted runners: Docker is available for Testcontainers PostgreSQL.
+          TESTCONTAINERS_RYUK_DISABLED: true
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [unit, integration]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Production build (Angular)
+        run: npm run build
+
+      # Optional: billable Playwright against staging (uncomment when you have e2e/ + config).
+      # - run: npx playwright install --with-deps chromium
+      # - run: npx playwright test --project=billable
+      #   env:
+      #     BILLABLE_URL: ${{ secrets.STAGING_URL }}
+
+  deploy:
+    needs: [frontend]
+    if: false # Enable when deploy is defined: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy (configure for Maemo)
+        run: |
+          echo "Define deploy: e.g. docker build/push, or SSH to Hetzner with a deploy key secret."
+          echo "Example: ssh -i ~/.ssh/key user@host 'cd /app && git pull && docker compose up -d'"
+          exit 0

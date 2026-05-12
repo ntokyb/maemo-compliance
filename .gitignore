@@ -1,0 +1,13 @@
+# Local secrets
+.env
+
+# Build outputs
+**/bin/
+**/obj/
+**/dist/
+
+# IDE / OS
+.idea/
+.vs/
+*.user
+.DS_Store

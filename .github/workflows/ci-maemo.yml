@@ -1,0 +1,114 @@
+name: CI - Maemo
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore NuGet packages
+        run: dotnet restore Maemo.sln
+
+      - name: Build solution
+        run: dotnet build Maemo.sln --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test Maemo.UnitTests/Maemo.UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-tests.trx" --logger "console;verbosity=normal"
+
+      - name: Run integration tests
+        run: dotnet test Maemo.IntegrationTests/Maemo.IntegrationTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --logger "console;verbosity=normal"
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            **/unit-tests.trx
+            **/integration-tests.trx
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: success()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Maemo.Api image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./Maemo.Api/Dockerfile
+          push: false
+          tags: maemo-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Maemo.Workers image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./workers/src/Maemo.Workers/Dockerfile
+          push: false
+          tags: maemo-workers:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Build Angular frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: maemo-portal:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: List built images
+        run: |
+          docker images | grep -E "maemo-api|maemo-workers|maemo-portal" || true
+
