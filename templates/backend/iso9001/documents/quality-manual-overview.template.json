@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-quality-manual",
+  "standard": "ISO 9001:2015",
+  "category": "QualityManual",
+  "type": "Document",
+  "title": "Quality Manual Overview",
+  "shortCode": "QMS-MAN-001",
+  "targetModule": "Documents",
+  "description": "High-level description of the Quality Management System (QMS) and how the organisation meets ISO 9001:2015 requirements.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

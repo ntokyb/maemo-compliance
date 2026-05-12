@@ -1,0 +1,11 @@
+{
+  "id": "narsa-records-retention-schedule",
+  "standard": "NARSA",
+  "category": "records",
+  "type": "Document",
+  "title": "Records Retention Schedule",
+  "shortCode": "NARSA-REC-001",
+  "targetModule": "Documents",
+  "description": "Records retention schedule template aligned with National Archives and Records Service of South Africa (NARSA) requirements. Defines retention periods for different record types."
+}
+

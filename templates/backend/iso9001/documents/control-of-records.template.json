@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-control-of-records",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Control of Records Procedure",
+  "shortCode": "QMS-PROC-002",
+  "targetModule": "Documents",
+  "description": "Procedure for controlling records in accordance with ISO 9001:2015 requirements. Covers record creation, storage, protection, retrieval, retention, and disposal.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

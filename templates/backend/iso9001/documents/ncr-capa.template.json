@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-ncr-capa",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Nonconformity and Corrective Action Procedure",
+  "shortCode": "QMS-PROC-003",
+  "targetModule": "Documents",
+  "description": "Procedure for identifying, documenting, and addressing nonconformities, and implementing corrective actions to prevent recurrence.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

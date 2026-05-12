@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-risk-opportunity",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Risk and Opportunity Management Procedure",
+  "shortCode": "QMS-PROC-006",
+  "targetModule": "Documents",
+  "description": "Procedure for identifying, assessing, and addressing risks and opportunities that could affect the Quality Management System and achievement of quality objectives.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

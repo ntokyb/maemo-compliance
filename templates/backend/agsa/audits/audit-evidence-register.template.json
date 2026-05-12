@@ -1,0 +1,11 @@
+{
+  "id": "agsa-audit-evidence-register",
+  "standard": "AGSA",
+  "category": "audits",
+  "type": "Document",
+  "title": "Audit Evidence Register",
+  "shortCode": "AGSA-AUD-001",
+  "targetModule": "Audits",
+  "description": "Template for maintaining an audit evidence register in compliance with Auditor-General of South Africa (AGSA) requirements. Tracks evidence collection, storage, and chain of custody."
+}
+

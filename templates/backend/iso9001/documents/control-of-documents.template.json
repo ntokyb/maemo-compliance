@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-control-of-documents",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Control of Documents Procedure",
+  "shortCode": "QMS-PROC-001",
+  "targetModule": "Documents",
+  "description": "Procedure for controlling documents in accordance with ISO 9001:2015 requirements. Covers document creation, review, approval, distribution, and obsolescence.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

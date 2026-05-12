@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-training-competence",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Training and Competence Procedure",
+  "shortCode": "QMS-PROC-007",
+  "targetModule": "Documents",
+  "description": "Procedure for determining competence requirements, providing training, and evaluating the effectiveness of training to ensure personnel are competent to perform their work.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

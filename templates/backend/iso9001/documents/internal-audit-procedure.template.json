@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-internal-audit-procedure",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Internal Audit Procedure",
+  "shortCode": "QMS-PROC-004",
+  "targetModule": "Documents",
+  "description": "Procedure for planning, conducting, and reporting internal audits of the Quality Management System in accordance with ISO 9001:2015 requirements.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+

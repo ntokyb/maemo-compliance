@@ -1,0 +1,11 @@
+{
+  "id": "popia-form-data-breach-notification",
+  "standard": "POPIA",
+  "category": "forms",
+  "type": "Form",
+  "title": "POPIA Data Breach Notification Template",
+  "shortCode": "POPIA-FORM-001",
+  "targetModule": "Documents",
+  "description": "Template for documenting and reporting data breaches in compliance with the Protection of Personal Information Act (POPIA). Includes breach details, affected individuals, and remediation actions."
+}
+

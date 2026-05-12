@@ -1,0 +1,13 @@
+{
+  "id": "iso9001-doc-management-review",
+  "standard": "ISO 9001:2015",
+  "category": "Procedure",
+  "type": "Document",
+  "title": "Management Review Procedure",
+  "shortCode": "QMS-PROC-005",
+  "targetModule": "Documents",
+  "description": "Procedure for conducting management reviews to ensure the continuing suitability, adequacy, and effectiveness of the Quality Management System.",
+  "language": "en-ZA",
+  "isSystemTemplate": true
+}
+
