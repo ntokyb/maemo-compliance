@@ -8,6 +8,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   DOTNET_VERSION: '8.0.x'
 
@@ -111,20 +115,85 @@ jobs:
           name: playwright-report-maemo
           path: e2e/maemo-compliance/playwright-report/
 
-  deploy:
-    needs: [frontend]
+  # Dockerfile paths: API/workers use repo root context; portal uses frontend/ (see MaemoCompliance.Api/Dockerfile, frontend/Dockerfile, workers/.../Dockerfile).
+  docker-build:
+    name: Build and push Docker images
+    needs: [unit, integration]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: MaemoCompliance.Api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ntokyb/maemo-compliance-api:latest
+            ghcr.io/ntokyb/maemo-compliance-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Portal image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ntokyb/maemo-compliance-portal:latest
+            ghcr.io/ntokyb/maemo-compliance-portal:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Workers image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: workers/src/MaemoCompliance.Workers/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ntokyb/maemo-compliance-workers:latest
+            ghcr.io/ntokyb/maemo-compliance-workers:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to production
+    needs: [unit, integration, docker-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to Hetzner via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.MAEMO_COMPLIANCE_SSH_HOST }}
           username: ${{ secrets.MAEMO_COMPLIANCE_SSH_USER }}
           key: ${{ secrets.MAEMO_COMPLIANCE_SSH_KEY }}
-          script_stop: true
           script: |
+            set -e
             cd /opt/maemo-compliance/app
             git pull origin main
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose --env-file /opt/maemo-compliance/.env -f docker-compose.prod.yml pull
+            docker compose --env-file /opt/maemo-compliance/.env -f docker-compose.prod.yml up -d --remove-orphans
+            sleep 10
+            curl -f http://localhost:8090/health/live \
+              || (docker compose --env-file /opt/maemo-compliance/.env -f docker-compose.prod.yml logs --tail 20 && exit 1)
+            echo "Deploy complete"
