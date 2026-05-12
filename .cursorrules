@@ -1,0 +1,248 @@
+## MAEMO COMPLIANCE — DEPLOYMENT RULES
+
+Read this entire file before making any changes.
+
+════════════════════════════════════════
+SERVER
+════════════════════════════════════════
+
+Server: 65.109.7.45 (Hetzner, billable server)
+User: maemo-compliance (isolated)
+App dir: /opt/maemo-compliance/app
+Env file: /opt/maemo-compliance/.env
+SSH: ssh -i ~/.ssh/billable_hetzner billable@65.109.7.45
+     then: sudo su - maemo-compliance
+
+════════════════════════════════════════
+DOMAINS
+════════════════════════════════════════
+
+Frontend (Angular portal): https://maemo-compliance.co.za
+  → nginx proxies to 127.0.0.1:3020 (maemo-compliance-portal container)
+
+API (.NET 8): https://api.maemo-compliance.co.za
+  → nginx proxies to 127.0.0.1:8090 (maemo-compliance-api container)
+
+Email: admin@maemo-compliance.co.za (Resend, domain verified)
+
+════════════════════════════════════════
+DOCKER
+════════════════════════════════════════
+
+Deploy command:
+  cd /opt/maemo-compliance/app
+  docker compose -f docker-compose.prod.yml up -d
+
+Containers:
+  maemo-compliance-postgres  (postgres:16-alpine, internal only)
+  maemo-compliance-api       (ghcr.io/ntokyb/maemo-compliance-api:latest, :8090)
+  maemo-compliance-workers   (ghcr.io/ntokyb/maemo-compliance-workers:latest)
+  maemo-compliance-portal    (ghcr.io/ntokyb/maemo-compliance-portal:latest, :3020)
+
+Network: app_default (shared with other apps on server)
+  → always use container names not localhost for inter-container comms
+  → maemo-compliance-postgres is the DB hostname inside containers
+
+Images built from:
+  API:     docker build -t ghcr.io/ntokyb/maemo-compliance-api:latest -f MaemoCompliance.Api/Dockerfile .
+  Workers: docker build -t ghcr.io/ntokyb/maemo-compliance-workers:latest -f workers/src/MaemoCompliance.Workers/Dockerfile .
+  Portal:  docker build -t ghcr.io/ntokyb/maemo-compliance-portal:latest -f frontend/Dockerfile .
+
+Portal Dockerfile requires frontend/nginx.conf to exist.
+If it does not exist the portal build WILL FAIL.
+frontend/nginx.conf must always be committed.
+
+════════════════════════════════════════
+MIGRATIONS
+════════════════════════════════════════
+
+Production images have NO dotnet SDK — cannot run
+dotnet ef inside running containers.
+
+Run migrations using the SDK image with --connection flag:
+
+  NETWORK=$(docker inspect maemo-compliance-api \
+    --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
+
+  docker run --rm \
+    --network "$NETWORK" \
+    -v /opt/maemo-compliance/app:/src \
+    -w /src \
+    mcr.microsoft.com/dotnet/sdk:8.0 \
+    sh -c 'dotnet restore MaemoCompliance.sln --verbosity quiet && \
+      dotnet tool install --global dotnet-ef --verbosity quiet && \
+      export PATH=$PATH:/root/.dotnet/tools && \
+      dotnet ef database update \
+        --project infrastructure/src/MaemoCompliance.Infrastructure \
+        --startup-project MaemoCompliance.Api \
+        --connection "Host=maemo-compliance-postgres;Port=5432;Database=maemo-compliance;Username=maemo-compliance;Password=YOUR_PASSWORD"'
+
+Run migrations BEFORE starting the API container.
+Run migrations AFTER every new migration is added.
+Verify migrations: docker exec maemo-compliance-postgres psql
+  -U maemo-compliance -d maemo-compliance
+  -c "SELECT migration_id FROM \"__EFMigrationsHistory\" ORDER BY migration_id;"
+
+════════════════════════════════════════
+ENV FILE
+════════════════════════════════════════
+
+Location: /opt/maemo-compliance/.env (NOT in repo, gitignored)
+Symlinked: /opt/maemo-compliance/app/.env → /opt/maemo-compliance/.env
+
+Required variables (never commit real values):
+  ASPNETCORE_ENVIRONMENT=Production
+  ConnectionStrings__MaemoDatabase=Host=maemo-compliance-postgres;Port=5432;Database=maemo-compliance;Username=maemo-compliance;Password=...
+  POSTGRES_DB=maemo-compliance
+  POSTGRES_USER=maemo-compliance
+  POSTGRES_PASSWORD=...
+  AZURE_AUTHORITY=https://login.microsoftonline.com/{tenant-id}
+  AZURE_AUDIENCE=api://{api-client-id}
+  AZURE_CLIENT_ID={spa-client-id}
+  Resend__ApiKey=re_...
+  Resend__FromAddress=admin@maemo-compliance.co.za
+  App__PublicPortalUrl=https://maemo-compliance.co.za
+  Features__SelfServiceSignupEnabled=true
+  Features__BillingEnabled=false
+  Storage__ForceLocalFileStorage=true
+  Storage__LocalBasePath=/app/files
+  Admin__DemoSeedApiKey=...
+
+CRITICAL: Passwords with ! or # in bash heredocs cause
+  "event not found" errors. Always use single quotes
+  or write the .env file directly with nano.
+
+════════════════════════════════════════
+GIT ON SERVER
+════════════════════════════════════════
+
+The app directory is owned by maemo-compliance user.
+Root will get "dubious ownership" errors.
+Always git as maemo-compliance:
+
+  sudo -u maemo-compliance bash << 'EOF'
+  git config --global user.email "admin@maemo-compliance.co.za"
+  git config --global user.name "Maemo Compliance"
+  git config --global --add safe.directory /opt/maemo-compliance/app
+  cd /opt/maemo-compliance/app
+  git pull origin main
+  EOF
+
+Deploy key: /home/maemo-compliance/.ssh/deploy_key
+SSH config for git: core.sshCommand=ssh -i /home/maemo-compliance/.ssh/deploy_key
+
+════════════════════════════════════════
+CI/CD
+════════════════════════════════════════
+
+GitHub repo: github.com/ntokyb/maemo-compliance
+GitHub Actions: .github/workflows/ci.yml
+
+Jobs:
+  unit        → dotnet test MaemoCompliance.UnitTests
+  integration → dotnet test MaemoCompliance.IntegrationTests (Testcontainers)
+  frontend    → npm ci && npm run build --configuration production
+  docker-build → builds and pushes 3 images to GHCR
+  deploy      → SSH to server, git pull, docker compose up -d
+
+Required GitHub secrets:
+  MAEMO_COMPLIANCE_SSH_HOST    = 65.109.7.45
+  MAEMO_COMPLIANCE_SSH_USER    = maemo-compliance
+  MAEMO_COMPLIANCE_SSH_KEY     = /home/maemo-compliance/.ssh/deploy_key (private)
+  MAEMO_COMPLIANCE_STAGING_URL = https://maemo-compliance.co.za
+  MAEMO_COMPLIANCE_API_STAGING_URL = https://api.maemo-compliance.co.za
+
+Packages permission: write (required for GHCR push)
+Set in ci.yml: permissions: contents: read, packages: write
+
+════════════════════════════════════════
+ARCHITECTURE
+════════════════════════════════════════
+
+Solution: MaemoCompliance.sln
+Namespace: MaemoCompliance.*
+Pattern: Clean Architecture + MediatR
+
+Projects:
+  MaemoCompliance.Api          → main API host
+  MaemoCompliance.Application  → use cases, commands, queries
+  MaemoCompliance.Domain       → entities, value objects
+  MaemoCompliance.Infrastructure → EF Core, Resend, Azure AD, SharePoint
+  MaemoCompliance.Workers      → background jobs
+  MaemoCompliance.UnitTests    → xUnit + FluentAssertions
+  MaemoCompliance.IntegrationTests → xUnit + WebApplicationFactory + Testcontainers
+
+Frontend: Angular (frontend/)
+  Build output: dist/maemo-compliance-portal/browser/
+  Served by: nginx inside portal container
+  nginx config: frontend/nginx.conf (MUST exist or build fails)
+  Angular routing: all routes → index.html (SPA)
+
+Auth: Azure AD (MSAL)
+  API validates JWT from Azure AD
+  SPA uses MSAL Angular library
+  Test users must exist in the Azure AD tenant
+
+Email: Resend
+  From: admin@maemo-compliance.co.za
+  Domain verified in Resend dashboard
+  Provider: ResendEmailSender (registered when Resend__ApiKey is set)
+  Fallback: LoggingEmailSender (when key is empty, dev/test only)
+
+════════════════════════════════════════
+NGINX
+════════════════════════════════════════
+
+Config: /etc/nginx/sites-available/maemo-compliance
+Enabled: /etc/nginx/sites-enabled/maemo-compliance (symlink)
+TLS cert: /etc/letsencrypt/live/maemo-compliance.co.za/
+
+After any nginx config change:
+  nginx -t && systemctl reload nginx
+
+TLS renewal: automatic via certbot systemd timer
+Manual renew: certbot renew --nginx
+
+Portal serves Angular SPA — nginx config must have:
+  try_files $uri $uri/ /index.html;
+  (without this all Angular routes return 404)
+
+════════════════════════════════════════
+WHAT MUST NEVER BE DONE
+════════════════════════════════════════
+
+NEVER use docker restart — does not reload .env
+ALWAYS use: docker compose -f docker-compose.prod.yml up -d
+
+NEVER run dotnet ef inside the API container
+  (no SDK in production image)
+ALWAYS use the SDK migration container pattern above
+
+NEVER commit real secrets to the repo
+NEVER commit .env files (they are gitignored)
+NEVER hardcode connection strings in code
+
+NEVER suggest AWS, GCP, or Azure hosting
+ALWAYS use Hetzner (65.109.7.45)
+
+NEVER use heredoc with passwords containing ! or #
+  bash history expansion breaks them
+ALWAYS use single quotes or nano for .env editing
+
+════════════════════════════════════════
+DEPLOYMENT CHECKLIST (run in order)
+════════════════════════════════════════
+
+1. dotnet build MaemoCompliance.sln — 0 errors
+2. dotnet test MaemoCompliance.UnitTests — all pass
+3. dotnet test MaemoCompliance.IntegrationTests — all pass
+4. npm run build --configuration production — 0 errors
+5. git push origin main
+6. GitHub Actions: all jobs green
+7. On server: git pull origin main
+8. Run migrations if new ones exist
+9. docker compose -f docker-compose.prod.yml up -d
+10. curl https://api.maemo-compliance.co.za/health/live
+    → {"status":"Healthy"}
+11. curl -sI https://maemo-compliance.co.za
+    → HTTP/2 200
