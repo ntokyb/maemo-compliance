@@ -19,7 +19,9 @@ export class AuthService {
 
   logout(): void {
     this.msalService.logoutRedirect({
-      postLogoutRedirectUri: typeof window !== 'undefined' ? window.location.origin : environment.azureAd.redirectUri
+      postLogoutRedirectUri:
+        environment.azureAd.postLogoutRedirectUri ??
+        (typeof window !== 'undefined' ? window.location.origin : environment.azureAd.redirectUri)
     });
   }
 

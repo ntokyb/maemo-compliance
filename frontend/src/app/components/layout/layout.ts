@@ -81,7 +81,8 @@ export class Layout implements OnInit, OnDestroy {
   logout(): void {
     this.tenantContextService.clearTenantId();
     this.msalService.logoutRedirect({
-      postLogoutRedirectUri: window.location.origin
+      postLogoutRedirectUri:
+        environment.azureAd.postLogoutRedirectUri ?? window.location.origin
     });
   }
 

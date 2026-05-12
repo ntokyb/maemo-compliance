@@ -15,9 +15,8 @@ export function MSALInstanceFactory(): IPublicClientApplication {
   const clientId = environment.azureAd.clientId;
   const authority = environment.azureAd.authority;
   
-  if (!clientId || clientId.includes('{') || !authority || authority.includes('{')) {
-    console.warn('MSAL configuration appears incomplete. Using placeholder values may cause authentication issues.');
-    console.warn('Please update environment.ts with valid Azure AD configuration.');
+  if (!clientId || !authority) {
+    console.warn('MSAL configuration appears incomplete.');
   }
 
   try {
@@ -25,7 +24,9 @@ export function MSALInstanceFactory(): IPublicClientApplication {
       auth: {
         clientId: clientId,
         authority: authority,
-        redirectUri: environment.azureAd.redirectUri
+        redirectUri: environment.azureAd.redirectUri,
+        postLogoutRedirectUri:
+          environment.azureAd.postLogoutRedirectUri ?? environment.azureAd.redirectUri
       },
       cache: {
         cacheLocation: 'localStorage',
@@ -45,6 +46,12 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   protectedResourceMap.set(`${origin}/api`, [scope]);
   protectedResourceMap.set(`${origin}/engine`, [scope]);
   protectedResourceMap.set(`${origin}/admin`, [scope]);
+  if (environment.apiBaseUrl?.startsWith('http')) {
+    const apiOrigin = new URL(environment.apiBaseUrl).origin;
+    protectedResourceMap.set(`${apiOrigin}/api`, [scope]);
+    protectedResourceMap.set(`${apiOrigin}/engine`, [scope]);
+    protectedResourceMap.set(`${apiOrigin}/admin`, [scope]);
+  }
 
   return {
     interactionType: InteractionType.Popup,
