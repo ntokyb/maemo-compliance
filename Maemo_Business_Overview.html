@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maemo - Governance, Risk & Compliance Platform</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #1976d2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #1976d2;
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+        
+        .section {
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        
+        .section h2 {
+            color: #1976d2;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .section h3 {
+            color: #555;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        .feature-card h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+            font-size: 16px;
+        }
+        
+        .feature-card ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .feature-card li {
+            margin: 5px 0;
+        }
+        
+        .compliance-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .use-case {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .use-case h4 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+        
+        .benefits-list {
+            background: #f0f7ff;
+            border-left: 4px solid #1976d2;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        
+        .benefits-list ul {
+            margin: 10px 0;
+        }
+        
+        .benefits-list li {
+            margin: 8px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table th {
+            background: #1976d2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 15mm;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .feature-grid {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Maemo</h1>
+        <div class="subtitle">Governance, Risk & Compliance Platform</div>
+        <div style="margin-top: 15px; color: #888; font-size: 14px;">
+            Comprehensive GRC Solution for South African Organizations
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Executive Summary</h2>
+        <p>
+            <strong>Maemo</strong> is a comprehensive Governance, Risk & Compliance (GRC) platform designed specifically 
+            for South African organizations. Built on modern .NET 8 and Angular technologies, Maemo provides a unified 
+            solution for managing documents, compliance, risk, audits, and non-conformance reporting.
+        </p>
+        <p>
+            The platform addresses critical business needs including POPIA (Protection of Personal Information Act) 
+            compliance, AGSA (Auditor-General of South Africa) audit readiness, BBBEE certification management, 
+            National Archives file plan alignment, and comprehensive audit trail capabilities.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Core Modules & Capabilities</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📄 Document Management</h4>
+                <ul>
+                    <li>Version control & history</li>
+                    <li>Approval workflows</li>
+                    <li>Document lifecycle management</li>
+                    <li>File plan metadata (National Archives)</li>
+                    <li>Retention management</li>
+                    <li>Template library (ISO 9001, POPIA, NARSA, AGSA)</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>🔒 POPIA Compliance</h4>
+                <ul>
+                    <li>PII classification & tracking</li>
+                    <li>Personal information inventory</li>
+                    <li>Retention period management</li>
+                    <li>Access trail reporting</li>
+                    <li>Data breach notification templates</li>
+                    <li>Compliance dashboard widgets</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>⚠️ Non-Conformance Reports (NCR)</h4>
+                <ul>
+                    <li>NCR creation & tracking</li>
+                    <li>Severity classification</li>
+                    <li>Status workflow management</li>
+                    <li>Root cause analysis</li>
+                    <li>Corrective action tracking</li>
+                    <li>Risk linkage</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>🎯 Risk Management</h4>
+                <ul>
+                    <li>Risk register</li>
+                    <li>Inherent & residual risk assessment</li>
+                    <li>Likelihood & impact scoring (1-5)</li>
+                    <li>Risk categorization</li>
+                    <li>Control documentation</li>
+                    <li>NCR linkage</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>✅ Audit Management</h4>
+                <ul>
+                    <li>Audit template creation</li>
+                    <li>Audit question management</li>
+                    <li>Audit run execution</li>
+                    <li>Evidence collection</li>
+                    <li>Findings tracking</li>
+                    <li>AGSA audit-ready evidence packs</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4>📊 BBBEE Management</h4>
+                <ul>
+                    <li>BBBEE certificate tracking</li>
+                    <li>Level classification (1-8)</li>
+                    <li>Expiry date monitoring</li>
+                    <li>Expiry alerts & dashboard</li>
+                    <li>Certificate document storage</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Compliance & Standards</h2>
+        <p>Maemo is designed to support compliance with South African regulations and international standards:</p>
+        
+        <div style="margin: 20px 0;">
+            <span class="compliance-badge">POPIA</span>
+            <span class="compliance-badge">AGSA</span>
+            <span class="compliance-badge">ISO 9001:2015</span>
+            <span class="compliance-badge">ISO 27001</span>
+            <span class="compliance-badge">NARSA</span>
+            <span class="compliance-badge">BBBEE</span>
+            <span class="compliance-badge">National Archives</span>
+        </div>
+
+        <h3>POPIA Compliance Features</h3>
+        <ul>
+            <li><strong>PII Classification:</strong> Categorize documents by personal information type (Personal Info, Special Personal Info, Children's Info, Financial, Health)</li>
+            <li><strong>Retention Management:</strong> Set and track retention periods for personal information</li>
+            <li><strong>Access Trail:</strong> Complete audit log of who accessed personal information and when</li>
+            <li><strong>Inventory Reports:</strong> Comprehensive personal information inventory for compliance reporting</li>
+            <li><strong>Retention Expiry Alerts:</strong> Dashboard widgets showing documents approaching retention expiry</li>
+        </ul>
+
+        <h3>AGSA Audit Readiness</h3>
+        <ul>
+            <li><strong>Evidence Packs:</strong> Generate comprehensive audit evidence reports (PDF) including:
+                <ul>
+                    <li>Document metadata & versions</li>
+                    <li>Complete business audit logs</li>
+                    <li>Approval history</li>
+                    <li>Linked NCRs and Risks</li>
+                    <li>All supporting documentation</li>
+                </ul>
+            </li>
+            <li><strong>Audit Trail:</strong> Immutable business audit logs for all critical operations</li>
+            <li><strong>Version Control:</strong> Complete document version history with timestamps and comments</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Key Business Use Cases</h2>
+
+        <div class="use-case">
+            <h4>1. Document Lifecycle Management</h4>
+            <p><strong>Scenario:</strong> An organization needs to manage policy documents, procedures, and certificates through their entire lifecycle.</p>
+            <p><strong>Solution:</strong> Maemo provides:</p>
+            <ul>
+                <li>Draft → Review → Approval → Active → Archive workflow</li>
+                <li>Version control with complete history</li>
+                <li>Review date tracking and reminders</li>
+                <li>Approval workflow with comments and rejection reasons</li>
+                <li>Template library for quick document creation</li>
+            </ul>
+        </div>
+
+        <div class="use-case">
+            <h4>2. POPIA Compliance Management</h4>
+            <p><strong>Scenario:</strong> An organization must demonstrate POPIA compliance and maintain a personal information inventory.</p>
+            <p><strong>Solution:</strong> Maemo enables:</p>
+            <ul>
+                <li>Classification of all documents containing personal information</li>
+                <li>Automatic tracking of access to personal information</li>
+                <li>Retention period management with expiry alerts</li>
+                <li>Comprehensive inventory reports for regulatory submission</li>
+                <li>Access trail reports showing who accessed what and when</li>
+            </ul>
+        </div>
+
+        <div class="use-case">
+            <h4>3. AGSA Audit Preparation</h4>
+            <p><strong>Scenario:</strong> An organization needs to prepare evidence packs for AGSA audits.</p>
+            <p><strong>Solution:</strong> Maemo generates:</p>
+            <ul>
+                <li>Complete audit evidence packs (PDF) with one click</li>
+                <li>All document versions, audit logs, approvals, and linked items</li>
+                <li>Professional formatted reports ready for submission</li>
+                <li>Immutable audit trail demonstrating compliance</li>
+            </ul>
+        </div>
+
+        <div class="use-case">
+            <h4>4. Non-Conformance & Corrective Action</h4>
+            <p><strong>Scenario:</strong> An organization needs to track non-conformances and manage corrective actions.</p>
+            <p><strong>Solution:</strong> Maemo provides:</p>
+            <ul>
+                <li>NCR creation with severity classification</li>
+                <li>Root cause analysis documentation</li>
+                <li>Corrective action planning and tracking</li>
+                <li>Linkage to related risks and documents</li>
+                <li>Status workflow from Open → In Progress → Closed</li>
+            </ul>
+        </div>
+
+        <div class="use-case">
+            <h4>5. Risk Register Management</h4>
+            <p><strong>Scenario:</strong> An organization needs to maintain a comprehensive risk register.</p>
+            <p><strong>Solution:</strong> Maemo enables:</p>
+            <ul>
+                <li>Risk identification and categorization</li>
+                <li>Inherent and residual risk assessment</li>
+                <li>5x5 risk matrix (Likelihood × Impact)</li>
+                <li>Control documentation</li>
+                <li>Linkage to NCRs and related documents</li>
+            </ul>
+        </div>
+
+        <div class="use-case">
+            <h4>6. BBBEE Certificate Management</h4>
+            <p><strong>Scenario:</strong> An organization needs to track BBBEE certificates and ensure timely renewal.</p>
+            <p><strong>Solution:</strong> Maemo provides:</p>
+            <ul>
+                <li>Certificate document storage</li>
+                <li>Level classification (1-8)</li>
+                <li>Expiry date tracking</li>
+                <li>Dashboard alerts for expiring certificates</li>
+                <li>Expiry reports for proactive management</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Technical Capabilities</h2>
+        
+        <h3>Architecture</h3>
+        <ul>
+            <li><strong>Backend:</strong> .NET 8 with Clean Architecture (Domain, Application, Infrastructure layers)</li>
+            <li><strong>Frontend:</strong> Angular 18 with standalone components</li>
+            <li><strong>Database:</strong> PostgreSQL with Entity Framework Core</li>
+            <li><strong>API:</strong> RESTful API with Minimal APIs</li>
+            <li><strong>Authentication:</strong> Azure AD (MSAL) integration</li>
+        </ul>
+
+        <h3>Multi-Tenancy</h3>
+        <ul>
+            <li>Complete tenant isolation at database level</li>
+            <li>Tenant-aware query filters</li>
+            <li>Tenant-specific module enablement</li>
+            <li>Tenant branding customization</li>
+        </ul>
+
+        <h3>Security & Compliance</h3>
+        <ul>
+            <li>Role-based access control</li>
+            <li>Document-level permissions (owner, consultant, admin)</li>
+            <li>Immutable business audit logs</li>
+            <li>Complete audit trail for all operations</li>
+            <li>Secure file storage</li>
+        </ul>
+
+        <h3>Reporting & Analytics</h3>
+        <ul>
+            <li>Dashboard with key metrics and widgets</li>
+            <li>POPIA compliance reports</li>
+            <li>Audit evidence pack generation (PDF)</li>
+            <li>Retention expiry reports</li>
+            <li>Export capabilities (CSV, PDF)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Business Value</h2>
+        
+        <div class="benefits-list">
+            <h3>Key Benefits</h3>
+            <ul>
+                <li><strong>Compliance Assurance:</strong> Automated tracking and reporting for POPIA, AGSA, and other regulatory requirements</li>
+                <li><strong>Risk Reduction:</strong> Centralized risk and NCR management with clear workflows</li>
+                <li><strong>Efficiency:</strong> Streamlined document workflows and approval processes</li>
+                <li><strong>Audit Readiness:</strong> One-click evidence pack generation for audits</li>
+                <li><strong>Visibility:</strong> Real-time dashboards showing compliance status and key metrics</li>
+                <li><strong>Traceability:</strong> Complete audit trail for all operations</li>
+                <li><strong>Scalability:</strong> Multi-tenant architecture supports multiple organizations</li>
+                <li><strong>Standards Alignment:</strong> Built-in templates for ISO 9001, POPIA, NARSA, AGSA</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Module Enablement</h2>
+        <p>Maemo supports flexible module enablement per tenant, allowing organizations to activate only the modules they need:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Module</th>
+                    <th>Key Features</th>
+                    <th>Compliance Focus</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Documents</strong></td>
+                    <td>Version control, workflows, templates, file plans</td>
+                    <td>POPIA, AGSA, ISO 9001</td>
+                </tr>
+                <tr>
+                    <td><strong>NCR</strong></td>
+                    <td>Non-conformance tracking, CAPA management</td>
+                    <td>ISO 9001, Quality Management</td>
+                </tr>
+                <tr>
+                    <td><strong>Risks</strong></td>
+                    <td>Risk register, assessment, controls</td>
+                    <td>ISO 27001, Enterprise Risk</td>
+                </tr>
+                <tr>
+                    <td><strong>Audits</strong></td>
+                    <td>Audit templates, runs, evidence collection</td>
+                    <td>AGSA, Internal Audits</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Dashboard & Reporting</h2>
+        
+        <h3>Dashboard Widgets</h3>
+        <ul>
+            <li><strong>Pending Approvals:</strong> Documents awaiting approval</li>
+            <li><strong>BBBEE Expiring:</strong> Certificates expiring soon</li>
+            <li><strong>POPIA Personal Info:</strong> Count of documents with PII</li>
+            <li><strong>Retention Expiry:</strong> Documents approaching retention expiry</li>
+            <li><strong>NCR Summary:</strong> Open non-conformances by severity</li>
+            <li><strong>Risk Summary:</strong> High-risk items requiring attention</li>
+        </ul>
+
+        <h3>Available Reports</h3>
+        <ul>
+            <li>POPIA Access Trail Report</li>
+            <li>Personal Information Inventory</li>
+            <li>Retention Expiry List</li>
+            <li>Document Audit Evidence Pack (PDF)</li>
+            <li>BBBEE Certificate Expiry Report</li>
+            <li>NCR Status Report</li>
+            <li>Risk Register Export</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Testing & Validation</h2>
+        <p>For Business Analysts testing Maemo, the following test scenarios are recommended:</p>
+        
+        <h3>Document Management</h3>
+        <ul>
+            <li>Create document from template</li>
+            <li>Upload document file</li>
+            <li>Submit for approval</li>
+            <li>Approve/reject document</li>
+            <li>Create new version</li>
+            <li>Archive document</li>
+            <li>View version history</li>
+        </ul>
+
+        <h3>POPIA Compliance</h3>
+        <ul>
+            <li>Classify document with PII type</li>
+            <li>Set retention period</li>
+            <li>View document (verify access log)</li>
+            <li>Generate POPIA inventory report</li>
+            <li>Generate access trail report</li>
+            <li>View retention expiry dashboard</li>
+        </ul>
+
+        <h3>Audit Evidence</h3>
+        <ul>
+            <li>Generate audit evidence pack for document</li>
+            <li>Verify all sections included (versions, logs, approvals, NCRs, Risks)</li>
+            <li>Verify PDF formatting</li>
+            <li>Test permission checks (owner, consultant, unauthorized user)</li>
+        </ul>
+
+        <h3>NCR & Risk</h3>
+        <ul>
+            <li>Create NCR</li>
+            <li>Link NCR to document</li>
+            <li>Create risk</li>
+            <li>Link risk to NCR</li>
+            <li>Update NCR status</li>
+            <li>Verify linkages appear in audit evidence</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p><strong>Maemo Governance, Risk & Compliance Platform</strong></p>
+        <p>Version 1.0 | Generated: <span id="date"></span></p>
+        <p style="margin-top: 10px; font-size: 11px; color: #999;">
+            This document provides an overview of Maemo's capabilities. For detailed technical documentation, 
+            please refer to the system documentation or contact the development team.
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('date').textContent = new Date().toLocaleDateString('en-ZA', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    </script>
+</body>
+</html>
+
